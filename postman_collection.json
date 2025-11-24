@@ -44,6 +44,78 @@
     {
       "key": "id_objet",
       "value": "33333333-3333-3333-3333-333333333333"
+    },
+    {
+      "key": "role_id",
+      "value": "44444444-4444-4444-4444-444444444444"
+    },
+    {
+      "key": "devise_id",
+      "value": "55555555-5555-5555-5555-555555555555"
+    },
+    {
+      "key": "methode_id",
+      "value": "66666666-6666-6666-6666-666666666666"
+    },
+    {
+      "key": "categorie_id",
+      "value": "77777777-7777-7777-7777-777777777777"
+    },
+    {
+      "key": "article_id",
+      "value": "88888888-8888-8888-8888-888888888888"
+    },
+    {
+      "key": "fournisseur_id",
+      "value": "99999999-9999-9999-9999-999999999999"
+    },
+    {
+      "key": "banque_id",
+      "value": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+    },
+    {
+      "key": "rib_id",
+      "value": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+    },
+    {
+      "key": "demande_id",
+      "value": "cccccccc-cccc-cccc-cccc-cccccccccccc"
+    },
+    {
+      "key": "ligne_demande_id",
+      "value": "dddddddd-dddd-dddd-dddd-dddddddddddd"
+    },
+    {
+      "key": "ligne_budget_id",
+      "value": "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"
+    },
+    {
+      "key": "document_id",
+      "value": "f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1"
+    },
+    {
+      "key": "signature_id",
+      "value": "12121212-1212-1212-1212-121212121212"
+    },
+    {
+      "key": "bc_id",
+      "value": "13131313-1313-1313-1313-131313131313"
+    },
+    {
+      "key": "ligne_bc_id",
+      "value": "14141414-1414-1414-1414-141414141414"
+    },
+    {
+      "key": "signature_bc_id",
+      "value": "15151515-1515-1515-1515-151515151515"
+    },
+    {
+      "key": "facture_id",
+      "value": "16161616-1616-1616-1616-161616161616"
+    },
+    {
+      "key": "paiement_id",
+      "value": "17171717-1717-1717-1717-171717171717"
     }
   ],
   "item": [
@@ -247,6 +319,27 @@
               }
             ],
             "url": "{{base_url}}/auth/2fa/disable/"
+          }
+        },
+        {
+          "name": "Auth - Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/auth/me/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Jean\",\n  \"last_name\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"0600000000\"\n}"
+            }
           }
         }
       ]
@@ -482,6 +575,1605 @@
                 ""
               ]
             }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Roles - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/roles/?code=ACH&search=achat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "ACH",
+                  "disabled": false
+                },
+                {
+                  "key": "search",
+                  "value": "achat",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Roles - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/roles/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"ACH\",\n  \"libelle\": \"Achats\",\n  \"description\": \"Profil Achats\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Roles - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/roles/{{role_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles",
+                "{{role_id}}",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Roles - Update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/roles/{{role_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles",
+                "{{role_id}}",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"ACH\",\n  \"libelle\": \"Achats (MAJ)\",\n  \"description\": \"Profil Achats modifi?\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Roles - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/roles/{{role_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "roles",
+                "{{role_id}}",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Devises",
+      "item": [
+        {
+          "name": "Devises - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/devises/?code_iso=EUR&actif=true"
+          }
+        },
+        {
+          "name": "Devises - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/devises/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code_iso\": \"EUR\",\n  \"libelle\": \"Euro\",\n  \"symbole\": \"?\",\n  \"taux_reference\": \"1.0\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Devises - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/devises/{{devise_id}}/"
+          }
+        },
+        {
+          "name": "Devises - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/devises/{{devise_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code_iso\": \"EUR\",\n  \"libelle\": \"Euro\",\n  \"symbole\": \"?\",\n  \"taux_reference\": \"1.0\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Devises - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/devises/{{devise_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Methodes Paiement",
+      "item": [
+        {
+          "name": "Methodes Paiement - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/methodes-paiement/?code=CARD&search=carte"
+          }
+        },
+        {
+          "name": "Methodes Paiement - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/methodes-paiement/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CARD\",\n  \"libelle\": \"Carte\",\n  \"description\": \"Paiement par carte\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Methodes Paiement - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/methodes-paiement/{{methode_id}}/"
+          }
+        },
+        {
+          "name": "Methodes Paiement - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/methodes-paiement/{{methode_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CARD\",\n  \"libelle\": \"Carte\",\n  \"description\": \"Paiement par carte\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Methodes Paiement - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/methodes-paiement/{{methode_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Categories - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/categories/?code=SERV&search=service"
+          }
+        },
+        {
+          "name": "Categories - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/categories/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SERV\",\n  \"libelle\": \"Services\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Categories - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/categories/{{categorie_id}}/"
+          }
+        },
+        {
+          "name": "Categories - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/categories/{{categorie_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SERV\",\n  \"libelle\": \"Services\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Categories - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/categories/{{categorie_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Articles",
+      "item": [
+        {
+          "name": "Articles - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/articles/?code_article=ART&search=ordi"
+          }
+        },
+        {
+          "name": "Articles - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/articles/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code_article\": \"ART001\",\n  \"designation\": \"Ordinateur\",\n  \"id_categorie\": \"{{categorie_id}}\",\n  \"unite\": \"unit?\",\n  \"prix_reference\": \"1000\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Articles - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/articles/{{article_id}}/"
+          }
+        },
+        {
+          "name": "Articles - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/articles/{{article_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code_article\": \"ART001\",\n  \"designation\": \"Ordinateur\",\n  \"id_categorie\": \"{{categorie_id}}\",\n  \"unite\": \"unit?\",\n  \"prix_reference\": \"1000\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Articles - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/articles/{{article_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fournisseurs",
+      "item": [
+        {
+          "name": "Fournisseurs - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs/?code=FOU&search=societe"
+          }
+        },
+        {
+          "name": "Fournisseurs - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code_fournisseur\": \"FOU001\",\n  \"raison_sociale\": \"Fournisseur A\",\n  \"adresse\": \"Adresse\",\n  \"telephone\": \"0102030405\",\n  \"email\": \"contact@fou.com\",\n  \"description\": \"\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Fournisseurs - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs/{{fournisseur_id}}/"
+          }
+        },
+        {
+          "name": "Fournisseurs - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs/{{fournisseur_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code_fournisseur\": \"FOU001\",\n  \"raison_sociale\": \"Fournisseur A\",\n  \"adresse\": \"Adresse\",\n  \"telephone\": \"0102030405\",\n  \"email\": \"contact@fou.com\",\n  \"description\": \"\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Fournisseurs - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs/{{fournisseur_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Banques",
+      "item": [
+        {
+          "name": "Banques - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/banques/?code=BNK&search=banque"
+          }
+        },
+        {
+          "name": "Banques - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/banques/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Banque A\",\n  \"code_banque\": \"BNK001\",\n  \"code_swift\": \"BNKSWIFT\",\n  \"adresse\": \"Adresse\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Banques - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/banques/{{banque_id}}/"
+          }
+        },
+        {
+          "name": "Banques - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/banques/{{banque_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Banque A\",\n  \"code_banque\": \"BNK001\",\n  \"code_swift\": \"BNKSWIFT\",\n  \"adresse\": \"Adresse\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Banques - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/banques/{{banque_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fournisseurs RIB",
+      "item": [
+        {
+          "name": "Fournisseurs RIB - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs-rib/?fournisseur_id={{fournisseur_id}}"
+          }
+        },
+        {
+          "name": "Fournisseurs RIB - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs-rib/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"id_banque\": \"{{banque_id}}\",\n  \"intitule_compte\": \"Compte A\",\n  \"numero_compte\": \"123456789\",\n  \"code_banque\": \"001\",\n  \"code_agence\": \"0001\",\n  \"cle_rib\": \"12\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Fournisseurs RIB - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs-rib/{{rib_id}}/"
+          }
+        },
+        {
+          "name": "Fournisseurs RIB - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs-rib/{{rib_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"id_banque\": \"{{banque_id}}\",\n  \"intitule_compte\": \"Compte A\",\n  \"numero_compte\": \"123456789\",\n  \"code_banque\": \"001\",\n  \"code_agence\": \"0001\",\n  \"cle_rib\": \"12\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Fournisseurs RIB - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs-rib/{{rib_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Demandes",
+      "item": [
+        {
+          "name": "Demandes - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/demandes/?numero=DM&statut=en_cours"
+          }
+        },
+        {
+          "name": "Demandes - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/demandes/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Demandes - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/demandes/{{demande_id}}/"
+          }
+        },
+        {
+          "name": "Demandes - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/demandes/{{demande_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Demandes - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/demandes/{{demande_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lignes Demande",
+      "item": [
+        {
+          "name": "Lignes Demande - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-demande/?demande_id={{demande_id}}"
+          }
+        },
+        {
+          "name": "Lignes Demande - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/lignes-demande/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_article\": \"{{article_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"designation\": \"PC\",\n  \"quantite\": \"2\",\n  \"prix_unitaire_estime\": \"900\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"commentaire\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Lignes Demande - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-demande/{{ligne_demande_id}}/"
+          }
+        },
+        {
+          "name": "Lignes Demande - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/lignes-demande/{{ligne_demande_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_article\": \"{{article_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"designation\": \"PC\",\n  \"quantite\": \"2\",\n  \"prix_unitaire_estime\": \"900\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"commentaire\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Lignes Demande - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-demande/{{ligne_demande_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lignes Budget",
+      "item": [
+        {
+          "name": "Lignes Budget - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-budget/?code=LB&exercice=2025"
+          }
+        },
+        {
+          "name": "Lignes Budget - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/lignes-budget/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exercice\": 2025,\n  \"chapitre\": \"CH1\",\n  \"article_budgetaire\": \"ART1\",\n  \"paragraphe\": \"P1\",\n  \"code_ligne\": \"LB001\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_budget\": \"100000\",\n  \"montant_engage\": \"0\",\n  \"montant_reste\": \"100000\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Lignes Budget - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-budget/{{ligne_budget_id}}/"
+          }
+        },
+        {
+          "name": "Lignes Budget - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/lignes-budget/{{ligne_budget_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"exercice\": 2025,\n  \"chapitre\": \"CH1\",\n  \"article_budgetaire\": \"ART1\",\n  \"paragraphe\": \"P1\",\n  \"code_ligne\": \"LB001\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_budget\": \"100000\",\n  \"montant_engage\": \"0\",\n  \"montant_reste\": \"100000\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Lignes Budget - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-budget/{{ligne_budget_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "item": [
+        {
+          "name": "Documents - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/documents/?type_document=BC"
+          }
+        },
+        {
+          "name": "Documents - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/documents/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type_document\": \"BC\",\n  \"reference_fonctionnelle\": \"BC-001\",\n  \"chemin_fichier\": \"/tmp/doc.pdf\",\n  \"hash_contenu\": \"\",\n  \"id_utilisateur\": \"{{user_id}}\",\n  \"statut_archivage\": \"actif\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Documents - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/documents/{{document_id}}/"
+          }
+        },
+        {
+          "name": "Documents - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/documents/{{document_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type_document\": \"BC\",\n  \"reference_fonctionnelle\": \"BC-001\",\n  \"chemin_fichier\": \"/tmp/doc.pdf\",\n  \"hash_contenu\": \"\",\n  \"id_utilisateur\": \"{{user_id}}\",\n  \"statut_archivage\": \"actif\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Documents - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/documents/{{document_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Signatures",
+      "item": [
+        {
+          "name": "Signatures - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/signatures/?document_id={{document_id}}"
+          }
+        },
+        {
+          "name": "Signatures - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/signatures/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_document\": \"{{document_id}}\",\n  \"id_utilisateur\": \"{{user_id}}\",\n  \"certificat\": \"cert\",\n  \"empreinte\": \"empreinte\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Signatures - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/signatures/{{signature_id}}/"
+          }
+        },
+        {
+          "name": "Signatures - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/signatures/{{signature_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_document\": \"{{document_id}}\",\n  \"id_utilisateur\": \"{{user_id}}\",\n  \"certificat\": \"cert\",\n  \"empreinte\": \"empreinte\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Signatures - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/signatures/{{signature_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bons Commande",
+      "item": [
+        {
+          "name": "Bons Commande - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/bons-commande/?numero=BC&statut=en_signature"
+          }
+        },
+        {
+          "name": "Bons Commande - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/bons-commande/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_bc\": \"BC001\",\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_demande_valider\": \"{{user_id}}\",\n  \"tva\": \"19\",\n  \"remise\": \"0\",\n  \"ca\": \"CA\",\n  \"id_methode_paiement\": \"{{methode_id}}\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_engage\": \"2000\",\n  \"id_ligne_budgetaire\": \"{{ligne_budget_id}}\",\n  \"type_achat\": \"IT\",\n  \"statut_bc\": \"en_redaction\",\n  \"id_redacteur\": \"{{user_id}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Bons Commande - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/bons-commande/{{bc_id}}/"
+          }
+        },
+        {
+          "name": "Bons Commande - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/bons-commande/{{bc_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_bc\": \"BC001\",\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_demande_valider\": \"{{user_id}}\",\n  \"tva\": \"19\",\n  \"remise\": \"0\",\n  \"ca\": \"CA\",\n  \"id_methode_paiement\": \"{{methode_id}}\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_engage\": \"2000\",\n  \"id_ligne_budgetaire\": \"{{ligne_budget_id}}\",\n  \"type_achat\": \"IT\",\n  \"statut_bc\": \"en_redaction\",\n  \"id_redacteur\": \"{{user_id}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Bons Commande - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/bons-commande/{{bc_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lignes BC",
+      "item": [
+        {
+          "name": "Lignes BC - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-bc/?bc_id={{bc_id}}"
+          }
+        },
+        {
+          "name": "Lignes BC - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/lignes-bc/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_bc\": \"{{bc_id}}\",\n  \"id_article\": \"{{article_id}}\",\n  \"designation\": \"PC\",\n  \"quantite\": \"2\",\n  \"prix_unitaire\": \"900\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"taux_tva\": \"19\",\n  \"remise\": \"0\",\n  \"ca\": \"CA\",\n  \"prix_net\": \"1800\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Lignes BC - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-bc/{{ligne_bc_id}}/"
+          }
+        },
+        {
+          "name": "Lignes BC - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/lignes-bc/{{ligne_bc_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_bc\": \"{{bc_id}}\",\n  \"id_article\": \"{{article_id}}\",\n  \"designation\": \"PC\",\n  \"quantite\": \"2\",\n  \"prix_unitaire\": \"900\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"taux_tva\": \"19\",\n  \"remise\": \"0\",\n  \"ca\": \"CA\",\n  \"prix_net\": \"1800\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Lignes BC - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-bc/{{ligne_bc_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Signatures BC",
+      "item": [
+        {
+          "name": "Signatures BC - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/signatures-bc/?bc_id={{bc_id}}"
+          }
+        },
+        {
+          "name": "Signatures BC - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/signatures-bc/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_bc\": \"{{bc_id}}\",\n  \"id_signataire\": \"{{user_id}}\",\n  \"niveau_validation\": \"1\",\n  \"decision\": \"en_attente\",\n  \"commentaire\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Signatures BC - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/signatures-bc/{{signature_bc_id}}/"
+          }
+        },
+        {
+          "name": "Signatures BC - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/signatures-bc/{{signature_bc_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_bc\": \"{{bc_id}}\",\n  \"id_signataire\": \"{{user_id}}\",\n  \"niveau_validation\": \"1\",\n  \"decision\": \"en_attente\",\n  \"commentaire\": \"\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Signatures BC - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/signatures-bc/{{signature_bc_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Factures",
+      "item": [
+        {
+          "name": "Factures - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/factures/?numero=FAC&statut=recue"
+          }
+        },
+        {
+          "name": "Factures - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/factures/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_bc\": \"{{bc_id}}\",\n  \"numero_facture\": \"FAC001\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_ht\": \"2000\",\n  \"montant_ttc\": \"2380\",\n  \"date_facture\": \"2025-01-01\",\n  \"statut_facture\": \"recue\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Factures - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/factures/{{facture_id}}/"
+          }
+        },
+        {
+          "name": "Factures - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/factures/{{facture_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_bc\": \"{{bc_id}}\",\n  \"numero_facture\": \"FAC001\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_ht\": \"2000\",\n  \"montant_ttc\": \"2380\",\n  \"date_facture\": \"2025-01-01\",\n  \"statut_facture\": \"recue\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Factures - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/factures/{{facture_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paiements",
+      "item": [
+        {
+          "name": "Paiements - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/paiements/?facture_id={{facture_id}}"
+          }
+        },
+        {
+          "name": "Paiements - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/paiements/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_facture\": \"{{facture_id}}\",\n  \"id_banque\": \"{{banque_id}}\",\n  \"id_methode_paiement\": \"{{methode_id}}\",\n  \"montant\": \"2380\",\n  \"date_ordre\": \"2025-01-05\",\n  \"statut_paiement\": \"en_attente\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Paiements - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/paiements/{{paiement_id}}/"
+          }
+        },
+        {
+          "name": "Paiements - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/paiements/{{paiement_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_facture\": \"{{facture_id}}\",\n  \"id_banque\": \"{{banque_id}}\",\n  \"id_methode_paiement\": \"{{methode_id}}\",\n  \"montant\": \"2380\",\n  \"date_ordre\": \"2025-01-05\",\n  \"statut_paiement\": \"en_attente\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Paiements - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/paiements/{{paiement_id}}/"
           }
         }
       ]

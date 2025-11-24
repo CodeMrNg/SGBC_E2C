@@ -24,6 +24,7 @@ from ..serializers.auth import (
     TwoFAEnableSerializer,
     TwoFASendSerializer,
     TwoFAVerifySerializer,
+    UserProfileUpdateSerializer,
     UserSerializer,
 )
 
@@ -114,6 +115,17 @@ class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        serializer = UserProfileUpdateSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        log_audit(request.user, 'profile_update', type_objet='USER', id_objet=request.user.id, request=request)
         return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
 
 
