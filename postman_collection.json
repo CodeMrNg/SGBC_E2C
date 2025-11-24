@@ -4,7 +4,8 @@
     "_postman_id": "00000000-0000-0000-0000-000000000000",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [{
+  "variable": [
+    {
       "key": "base_url",
       "value": "http://localhost:8000"
     },
@@ -27,18 +28,38 @@
     {
       "key": "code",
       "value": "123456"
+    },
+    {
+      "key": "departement_id",
+      "value": "11111111-1111-1111-1111-111111111111"
+    },
+    {
+      "key": "log_id",
+      "value": "22222222-2222-2222-2222-222222222222"
+    },
+    {
+      "key": "type_objet",
+      "value": "DEPARTEMENT"
+    },
+    {
+      "key": "id_objet",
+      "value": "33333333-3333-3333-3333-333333333333"
     }
   ],
-  "item": [{
+  "item": [
+    {
       "name": "Auth",
-      "item": [{
+      "item": [
+        {
           "name": "Auth - Login",
           "request": {
             "method": "POST",
-            "header": [{
-              "key": "Content-Type",
-              "value": "application/json"
-            }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/auth/login/",
             "body": {
               "mode": "raw",
@@ -50,10 +71,12 @@
           "name": "Auth - Refresh",
           "request": {
             "method": "POST",
-            "header": [{
-              "key": "Content-Type",
-              "value": "application/json"
-            }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/auth/refresh/",
             "body": {
               "mode": "raw",
@@ -65,7 +88,8 @@
           "name": "Auth - Logout",
           "request": {
             "method": "POST",
-            "header": [{
+            "header": [
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               },
@@ -85,10 +109,12 @@
           "name": "Auth - Me",
           "request": {
             "method": "GET",
-            "header": [{
-              "key": "Authorization",
-              "value": "Bearer {{access}}"
-            }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
             "url": "{{base_url}}/auth/me/"
           }
         },
@@ -96,7 +122,8 @@
           "name": "Auth - Change Password",
           "request": {
             "method": "POST",
-            "header": [{
+            "header": [
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               },
@@ -116,10 +143,12 @@
           "name": "Auth - Reset Password (request)",
           "request": {
             "method": "POST",
-            "header": [{
-              "key": "Content-Type",
-              "value": "application/json"
-            }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/auth/reset-password/",
             "body": {
               "mode": "raw",
@@ -131,10 +160,12 @@
           "name": "Auth - Reset Password Confirm",
           "request": {
             "method": "POST",
-            "header": [{
-              "key": "Content-Type",
-              "value": "application/json"
-            }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/auth/reset-password/confirm/",
             "body": {
               "mode": "raw",
@@ -146,7 +177,8 @@
           "name": "2FA - Send",
           "request": {
             "method": "POST",
-            "header": [{
+            "header": [
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               },
@@ -166,10 +198,12 @@
           "name": "2FA - Verify",
           "request": {
             "method": "POST",
-            "header": [{
-              "key": "Content-Type",
-              "value": "application/json"
-            }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": "{{base_url}}/auth/2fa/verify/",
             "body": {
               "mode": "raw",
@@ -181,7 +215,8 @@
           "name": "2FA - Enable",
           "request": {
             "method": "POST",
-            "header": [{
+            "header": [
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               },
@@ -201,7 +236,8 @@
           "name": "2FA - Disable",
           "request": {
             "method": "POST",
-            "header": [{
+            "header": [
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               },
@@ -217,14 +253,17 @@
     },
     {
       "name": "Audit",
-      "item": [{
+      "item": [
+        {
           "name": "Audit - List",
           "request": {
             "method": "GET",
-            "header": [{
-              "key": "Authorization",
-              "value": "Bearer {{access}}"
-            }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
             "url": "{{base_url}}/audit/logs/"
           }
         },
@@ -232,32 +271,61 @@
           "name": "Audit - Detail",
           "request": {
             "method": "GET",
-            "header": [{
-              "key": "Authorization",
-              "value": "Bearer {{access}}"
-            }],
-            "url": "{{base_url}}/audit/logs/<log_id>/"
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/audit/logs/{{log_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "audit",
+                "logs",
+                "{{log_id}}",
+                ""
+              ]
+            }
           }
         },
         {
           "name": "Audit - Object History",
           "request": {
             "method": "GET",
-            "header": [{
-              "key": "Authorization",
-              "value": "Bearer {{access}}"
-            }],
-            "url": "{{base_url}}/audit/object/<type_objet>/<id_objet>/"
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/audit/object/{{type_objet}}/{{id_objet}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "audit",
+                "object",
+                "{{type_objet}}",
+                "{{id_objet}}",
+                ""
+              ]
+            }
           }
         },
         {
           "name": "Audit - Export CSV",
           "request": {
             "method": "GET",
-            "header": [{
-              "key": "Authorization",
-              "value": "Bearer {{access}}"
-            }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
             "url": "{{base_url}}/audit/logs/export/?format=csv"
           }
         },
@@ -265,10 +333,12 @@
           "name": "Audit - Export JSON",
           "request": {
             "method": "GET",
-            "header": [{
-              "key": "Authorization",
-              "value": "Bearer {{access}}"
-            }],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
             "url": "{{base_url}}/audit/logs/export/?format=json"
           }
         }
@@ -276,22 +346,52 @@
     },
     {
       "name": "Departements",
-      "item": [{
+      "item": [
+        {
           "name": "Departements - List",
           "request": {
             "method": "GET",
-            "header": [{
-              "key": "Authorization",
-              "value": "Bearer {{access}}"
-            }],
-            "url": "{{base_url}}/departements/"
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/departements/?actif=true&nom=IT&search=info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "departements",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "actif",
+                  "value": "true",
+                  "disabled": false
+                },
+                {
+                  "key": "nom",
+                  "value": "IT",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "info",
+                  "disabled": true
+                }
+              ]
+            }
           }
         },
         {
           "name": "Departements - Create",
           "request": {
             "method": "POST",
-            "header": [{
+            "header": [
+              {
                 "key": "Authorization",
                 "value": "Bearer {{access}}"
               },
@@ -311,18 +411,31 @@
           "name": "Departements - Detail",
           "request": {
             "method": "GET",
-            "header": [{
-              "key": "Authorization",
-              "value": "Bearer {{access}}"
-            }],
-            "url": "{{base_url}}/departements/<departement_id>/"
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/departements/{{departement_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "departements",
+                "{{departement_id}}",
+                ""
+              ]
+            }
           }
         },
         {
           "name": "Departements - Update",
           "request": {
             "method": "PUT",
-            "header": [{
+            "header": [
+              {
                 "key": "Authorization",
                 "value": "Bearer {{access}}"
               },
@@ -331,7 +444,17 @@
                 "value": "application/json"
               }
             ],
-            "url": "{{base_url}}/departements/<departement_id>/",
+            "url": {
+              "raw": "{{base_url}}/departements/{{departement_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "departements",
+                "{{departement_id}}",
+                ""
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nom\": \"IT\",\n  \"description\": \"Informatique (MAJ)\",\n  \"actif\": true\n}"
@@ -342,11 +465,23 @@
           "name": "Departements - Delete",
           "request": {
             "method": "DELETE",
-            "header": [{
-              "key": "Authorization",
-              "value": "Bearer {{access}}"
-            }],
-            "url": "{{base_url}}/departements/<departement_id>/"
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/departements/{{departement_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "departements",
+                "{{departement_id}}",
+                ""
+              ]
+            }
           }
         }
       ]
