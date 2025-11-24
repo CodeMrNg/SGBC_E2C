@@ -1,0 +1,355 @@
+{
+  "info": {
+    "name": "SGBC",
+    "_postman_id": "00000000-0000-0000-0000-000000000000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{
+      "key": "base_url",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "email",
+      "value": "isnhov44@gmail.com"
+    },
+    {
+      "key": "password",
+      "value": "123456"
+    },
+    {
+      "key": "refresh",
+      "value": ""
+    },
+    {
+      "key": "access",
+      "value": ""
+    },
+    {
+      "key": "code",
+      "value": "123456"
+    }
+  ],
+  "item": [{
+      "name": "Auth",
+      "item": [{
+          "name": "Auth - Login",
+          "request": {
+            "method": "POST",
+            "header": [{
+              "key": "Content-Type",
+              "value": "application/json"
+            }],
+            "url": "{{base_url}}/auth/login/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Auth - Refresh",
+          "request": {
+            "method": "POST",
+            "header": [{
+              "key": "Content-Type",
+              "value": "application/json"
+            }],
+            "url": "{{base_url}}/auth/refresh/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Auth - Logout",
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/auth/logout/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Auth - Me",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Authorization",
+              "value": "Bearer {{access}}"
+            }],
+            "url": "{{base_url}}/auth/me/"
+          }
+        },
+        {
+          "name": "Auth - Change Password",
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/auth/change-password/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"old_password\": \"Ancien!123\",\n  \"new_password\": \"Nouveau!123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Auth - Reset Password (request)",
+          "request": {
+            "method": "POST",
+            "header": [{
+              "key": "Content-Type",
+              "value": "application/json"
+            }],
+            "url": "{{base_url}}/auth/reset-password/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Auth - Reset Password Confirm",
+          "request": {
+            "method": "POST",
+            "header": [{
+              "key": "Content-Type",
+              "value": "application/json"
+            }],
+            "url": "{{base_url}}/auth/reset-password/confirm/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"token\": \"<token_recu>\",\n  \"new_password\": \"Nouveau!123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2FA - Send",
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/auth/2fa/send/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"sms\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2FA - Verify",
+          "request": {
+            "method": "POST",
+            "header": [{
+              "key": "Content-Type",
+              "value": "application/json"
+            }],
+            "url": "{{base_url}}/auth/2fa/verify/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{code}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2FA - Enable",
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/auth/2fa/enable/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"sms\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2FA - Disable",
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/auth/2fa/disable/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit",
+      "item": [{
+          "name": "Audit - List",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Authorization",
+              "value": "Bearer {{access}}"
+            }],
+            "url": "{{base_url}}/audit/logs/"
+          }
+        },
+        {
+          "name": "Audit - Detail",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Authorization",
+              "value": "Bearer {{access}}"
+            }],
+            "url": "{{base_url}}/audit/logs/<log_id>/"
+          }
+        },
+        {
+          "name": "Audit - Object History",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Authorization",
+              "value": "Bearer {{access}}"
+            }],
+            "url": "{{base_url}}/audit/object/<type_objet>/<id_objet>/"
+          }
+        },
+        {
+          "name": "Audit - Export CSV",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Authorization",
+              "value": "Bearer {{access}}"
+            }],
+            "url": "{{base_url}}/audit/logs/export/?format=csv"
+          }
+        },
+        {
+          "name": "Audit - Export JSON",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Authorization",
+              "value": "Bearer {{access}}"
+            }],
+            "url": "{{base_url}}/audit/logs/export/?format=json"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Departements",
+      "item": [{
+          "name": "Departements - List",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Authorization",
+              "value": "Bearer {{access}}"
+            }],
+            "url": "{{base_url}}/departements/"
+          }
+        },
+        {
+          "name": "Departements - Create",
+          "request": {
+            "method": "POST",
+            "header": [{
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/departements/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"IT\",\n  \"description\": \"Informatique\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Departements - Detail",
+          "request": {
+            "method": "GET",
+            "header": [{
+              "key": "Authorization",
+              "value": "Bearer {{access}}"
+            }],
+            "url": "{{base_url}}/departements/<departement_id>/"
+          }
+        },
+        {
+          "name": "Departements - Update",
+          "request": {
+            "method": "PUT",
+            "header": [{
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/departements/<departement_id>/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"IT\",\n  \"description\": \"Informatique (MAJ)\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Departements - Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [{
+              "key": "Authorization",
+              "value": "Bearer {{access}}"
+            }],
+            "url": "{{base_url}}/departements/<departement_id>/"
+          }
+        }
+      ]
+    }
+  ]
+}
