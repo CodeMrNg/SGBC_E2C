@@ -1,5 +1,5 @@
 from .base import BaseModel
-from .organisation import Departement, Role, Utilisateur
+from .organisation import Departement, Permission, Role, RolePermission, Utilisateur
 from .parametres_financiers import Devise, MethodePaiement
 from .fournisseurs import Categorie, Article, Fournisseur, Banque, FournisseurRIB
 from .demandes import Demande, LigneDemande
@@ -14,6 +14,8 @@ __all__ = [
     'BaseModel',
     'Departement',
     'Role',
+    'Permission',
+    'RolePermission',
     'Utilisateur',
     'Devise',
     'MethodePaiement',

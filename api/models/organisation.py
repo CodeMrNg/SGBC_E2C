@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
@@ -25,6 +26,47 @@ class Role(models.Model):
 
     def __str__(self) -> str:
         return self.libelle
+
+
+class Permission(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=50, unique=True)
+    libelle = models.CharField(max_length=150)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return self.code
+
+
+class RolePermission(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id_role = models.ForeignKey(
+        'Role',
+        on_delete=models.PROTECT,
+        related_name='permissions',
+    )
+    id_permission = models.ForeignKey(
+        'Permission',
+        on_delete=models.PROTECT,
+        related_name='roles',
+    )
+    date_attribution = models.DateTimeField(null=True, blank=True)
+    attribue_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='permissions_attribuees',
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['id_role', 'id_permission'], name='unique_role_permission'),
+        ]
+
+    def __str__(self) -> str:
+        return f'{self.id_role} -> {self.id_permission}'
 
 
 class UtilisateurManager(BaseUserManager):

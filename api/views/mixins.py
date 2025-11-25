@@ -1,4 +1,6 @@
 from rest_framework import mixins, permissions, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from ..auth_utils import log_audit
 
@@ -56,3 +58,11 @@ class AuditModelViewSet(
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
+
+    @action(detail=False, methods=['get'], url_path='count')
+    def count(self, request):
+        """
+        Return the total count of resources after applying filters.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        return Response({'count': queryset.count()})
