@@ -9,11 +9,11 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-import dj_database_url
+from datetime import datetime, timedelta
+#import dj_database_url
 import os
 from pathlib import Path
 from django.contrib.messages import constants as messages
-from datetime import timedelta
 import os
 # Import pour les variables d'environnement
 try:
@@ -201,8 +201,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'fr-fr'
-
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Brazzaville'
 
 USE_I18N = True
 
@@ -212,7 +211,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -236,12 +237,26 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    # Durée de validité de l'access token (3 jours)
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
+    # Durée de validité du token de rafraîchissement (7 jours)
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
+    # Durée de validité du token de rafraîchissement "coulissant" (30 jours)
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
+    # Période de grâce pour le rafraîchissement du token (1 jour)
+    'SLIDING_TOKEN_REFRESH_LIFETIME_GRACE_PERIOD': timedelta(days=1),
+    # Durée de validité maximale pour le rafraîchissement du token (30 jours)
+    'SLIDING_TOKEN_REFRESH_EXPIRATION_DELTA': timedelta(days=30),
+    # Algorithme de chiffrement JWT (HS256 est un choix courant)
+    'ALGORITHM': 'HS256',
+    # Clé secrète utilisée pour signer les tokens (utilisez la clé secrète de votre projet Django)
+    'SIGNING_KEY': SECRET_KEY,
+    # Clé de vérification (laissez-la à None pour utiliser la même que la clé de signature)
+    'VERIFYING_KEY': None,
+    # Type d'en-tête d'authentification à utiliser dans les requêtes (Bearer est courant)
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@example.com')
