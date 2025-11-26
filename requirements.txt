@@ -6,3 +6,25 @@ djangorestframework-simplejwt>=5.3.1,<6.0
 Pillow>=10.4.0,<11.0
 sqlparse==0.5.3
 tzdata==2025.2
+
+# Django REST Framework
+djangorestframework>=3.14.0
+# Gestion du CORS (Cross-Origin Resource Sharing)
+django-cors-headers>=4.3.1
+
+# Filtres dans les API
+django-filter>=24.2
+
+# Base de données PostgreSQL (si utilisée)
+psycopg2-binary>=2.9.9
+
+# Gestion des variables d'environnement
+python-decouple>=3.8
+
+# Outils utilitaires (facultatif mais recommandé)
+Pillow>=10.0.0   # Pour la gestion d’images
+requests>=2.32.0 # Pour les requêtes HTTP sortantes
+gunicorn>=21.2.0 # Serveur WSGI pour le déploiement
+python-dotenv>=1.0.0 # Pour charger les variables d’environnement depuis un fichier .env
+
+whitenoise>=6.5.0 # Pour servir des fichiers statiques en production

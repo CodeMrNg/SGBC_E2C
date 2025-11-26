@@ -9,26 +9,51 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
-import datetime
+import dj_database_url
 import os
 from pathlib import Path
+from django.contrib.messages import constants as messages
+from datetime import timedelta
+import os
+# Import pour les variables d'environnement
+try:
+    from dotenv import load_dotenv
+    # Charger les variables d'environnement depuis le fichier .env
+    load_dotenv()
+except ImportError:
+    # python-dotenv n'est pas installé, utiliser seulement les variables d'environnement système
+    pass
 
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-secondary',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-15enu260h^j+950*ifdzw+0myeh-v1xvu2lgcc@yg1+%$3u-m+'
+# IMPORTANT: La clé secrète ne devrait JAMAIS être codée en dur dans le code source
+# Utilisez une variable d'environnement pour stocker cette clé de manière sécurisée
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG doit être False en production pour éviter de divulguer des informations sensibles
+# Utilisez une variable d'environnement pour contrôler cette valeur
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = []
+    
+allowed_hosts_env = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0')    
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]   
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Application definition
 
@@ -45,6 +70,70 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'api',
 ]
+
+
+
+
+
+# Configuration CORS (Cross-Origin Resource Sharing)
+# Définit les origines autorisées à faire des requêtes vers votre API
+CORS_ALLOWED_ORIGINS = [
+    # Développement local
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:8080",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8080",
+]
+
+# Configuration CSRF pour les origines de confiance
+# IMPORTANT: Nécessaire pour que Django accepte les requêtes POST depuis ces domaines
+CSRF_TRUSTED_ORIGINS = [
+    'https://api.hippocrate.aa-ce.org/',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+
+
+CSRF_ALLOWED_ORIGINS = CSRF_TRUSTED_ORIGINS
+
+CORS_ORIGINS_WHITELIST = CSRF_TRUSTED_ORIGINS
+
+# Configuration CORS détaillée
+# ⚠️ DÉVELOPPEMENT UNIQUEMENT : Authoriser toutes les origines si en mode DEBUG
+# Autorise tout en développement, sécurisé en production
+CORS_ALLOW_ALL_ORIGINS = False
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# Permettre les credentials (cookies, authorization headers)
+CORS_ALLOW_CREDENTIALS = True
+
+# Préflight requests cache (en secondes)
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24 heures
+
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
