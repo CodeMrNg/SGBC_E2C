@@ -50,6 +50,10 @@
       "value": "44444444-4444-4444-4444-444444444444"
     },
     {
+      "key": "user_id",
+      "value": "12121212-1212-1212-1212-121212121212"
+    },
+    {
       "key": "devise_id",
       "value": "55555555-5555-5555-5555-555555555555"
     },
@@ -709,6 +713,159 @@
               "path": [
                 "roles",
                 "{{role_id}}",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Utilisateurs",
+      "item": [
+        {
+          "name": "Utilisateurs - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/utilisateurs/?search=jean&actif=true&departement_id={{departement_id}}&role_id={{role_id}}&mfa_active=false",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "utilisateurs",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "jean",
+                  "disabled": true
+                },
+                {
+                  "key": "actif",
+                  "value": "true",
+                  "disabled": false
+                },
+                {
+                  "key": "departement_id",
+                  "value": "{{departement_id}}",
+                  "disabled": true
+                },
+                {
+                  "key": "role_id",
+                  "value": "{{role_id}}",
+                  "disabled": true
+                },
+                {
+                  "key": "mfa_active",
+                  "value": "false",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Utilisateurs - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/utilisateurs/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"jdoe\",\n  \"email\": \"jdoe@example.com\",\n  \"password\": \"Password!123\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"phone\": \"0600000001\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_role\": \"{{role_id}}\",\n  \"mfa_active\": false,\n  \"mfa_method\": \"email\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Utilisateurs - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/utilisateurs/{{user_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "utilisateurs",
+                "{{user_id}}",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Utilisateurs - Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/utilisateurs/{{user_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "utilisateurs",
+                "{{user_id}}",
+                ""
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"phone\": \"0600000099\",\n  \"id_role\": \"{{role_id}}\",\n  \"actif\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Utilisateurs - Désactiver",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/utilisateurs/{{user_id}}/desactiver/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "utilisateurs",
+                "{{user_id}}",
+                "desactiver",
                 ""
               ]
             }
