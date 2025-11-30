@@ -1,12 +1,18 @@
+from django.db import transaction
 from django.db.models import Q
-from rest_framework import filters
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
+from ..auth_utils import log_audit
 from ..models import (
     Article,
     Banque,
     BonCommande,
     Categorie,
     Demande,
+    Departement,
     Devise,
     Document,
     Facture,
@@ -208,6 +214,39 @@ class DemandeViewSet(AuditModelViewSet):
             qs = qs.filter(Q(numero_demande__icontains=search) | Q(objet__icontains=search))
         return qs
 
+    @action(detail=True, methods=['post'], url_path='transfer')
+    def transfer(self, request, pk=None):
+        departement_id = request.data.get('departement_id')
+        if not departement_id:
+            return Response(
+                {'detail': 'Le champ departement_id est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        departement = get_object_or_404(Departement, pk=departement_id)
+        demande = self.get_object()
+
+        if demande.id_departement_id == departement.id:
+            return Response(
+                {'detail': 'La demande est déjà rattachée à ce département.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            demande.id_departement = departement
+            demande.save(update_fields=['id_departement'])
+            log_audit(
+                request.user,
+                'demande_transfer',
+                type_objet=self.audit_type,
+                id_objet=demande.id,
+                request=request,
+                details=f'Transfert vers le département {departement.id}',
+            )
+
+        serializer = self.get_serializer(demande)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class LigneDemandeViewSet(AuditModelViewSet):
     queryset = LigneDemande.objects.select_related('id_demande', 'id_article', 'id_fournisseur').all()
@@ -319,6 +358,48 @@ class BonCommandeViewSet(AuditModelViewSet):
         if departement:
             qs = qs.filter(id_departement_id=departement)
         return qs
+
+    @action(detail=True, methods=['post'], url_path='transfer')
+    def transfer(self, request, pk=None):
+        departement_id = request.data.get('departement_id')
+        if not departement_id:
+            return Response(
+                {'detail': 'Le champ departement_id est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        departement = get_object_or_404(Departement, pk=departement_id)
+        bc = self.get_object()
+
+        if bc.id_departement_id == departement.id:
+            return Response(
+                {'detail': 'Le bon de commande est déjà rattaché à ce département.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            bc.id_departement = departement
+            bc.save(update_fields=['id_departement'])
+            demande_updated = False
+            if bc.id_demande and bc.id_demande.id_departement_id != departement.id:
+                bc.id_demande.id_departement = departement
+                bc.id_demande.save(update_fields=['id_departement'])
+                demande_updated = True
+
+            log_audit(
+                request.user,
+                'bon_commande_transfer',
+                type_objet=self.audit_type,
+                id_objet=bc.id,
+                request=request,
+                details=(
+                    f'Transfert vers le département {departement.id}'
+                    + (' avec mise à jour de la demande liée' if demande_updated else '')
+                ),
+            )
+
+        serializer = self.get_serializer(bc)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class LigneBCViewSet(AuditModelViewSet):

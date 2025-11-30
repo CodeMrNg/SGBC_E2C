@@ -291,12 +291,13 @@ class DemandeAdmin(admin.ModelAdmin):
     list_display = (
         'numero_demande',
         'objet',
+        'source',
         'id_departement',
         'statut_demande',
         'date_creation',
         'date_validation_budget',
     )
-    search_fields = ('numero_demande', 'objet', 'description')
+    search_fields = ('numero_demande', 'objet', 'description', 'source')
     list_filter = ('statut_demande', 'id_departement', 'date_creation')
 
 

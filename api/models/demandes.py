@@ -15,6 +15,7 @@ class Demande(models.Model):
     numero_demande = models.CharField(max_length=100, unique=True)
     objet = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    source = models.CharField(max_length=150, blank=True, default='')
     date_creation = models.DateTimeField(auto_now_add=True)
     date_validation_budget = models.DateTimeField(null=True, blank=True)
     statut_demande = models.CharField(

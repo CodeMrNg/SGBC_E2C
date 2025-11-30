@@ -1508,7 +1508,7 @@
             "url": "{{base_url}}/demandes/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
+              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"source\": \"email\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
             }
           }
         },
@@ -1542,7 +1542,7 @@
             "url": "{{base_url}}/demandes/{{demande_id}}/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
+              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"source\": \"email\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
             }
           }
         },
@@ -1557,6 +1557,27 @@
               }
             ],
             "url": "{{base_url}}/demandes/{{demande_id}}/"
+          }
+        },
+        {
+          "name": "Demandes - Transfer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/demandes/{{demande_id}}/transfer/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"departement_id\": \"{{departement_id}}\"\n}"
+            }
           }
         }
       ]
@@ -1987,6 +2008,27 @@
               }
             ],
             "url": "{{base_url}}/bons-commande/{{bc_id}}/"
+          }
+        },
+        {
+          "name": "Bons Commande - Transfer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/bons-commande/{{bc_id}}/transfer/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"departement_id\": \"{{departement_id}}\"\n}"
+            }
           }
         }
       ]
