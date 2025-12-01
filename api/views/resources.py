@@ -1,8 +1,9 @@
-from django.db import transaction
+from django.db import models, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from ..auth_utils import log_audit
@@ -25,7 +26,11 @@ from ..models import (
     Paiement,
     SignatureBC,
     SignatureNumerique,
+    Transfert,
 )
+from ..models.bon_commande import StatutBC
+from ..models.demandes import StatutDemande
+from ..models.transferts import StatutTransfert
 from ..serializers.resources import (
     ArticleSerializer,
     BanqueSerializer,
@@ -44,6 +49,7 @@ from ..serializers.resources import (
     PaiementSerializer,
     SignatureBCSerializer,
     SignatureNumeriqueSerializer,
+    TransfertSerializer,
 )
 from .mixins import AuditModelViewSet
 
@@ -193,7 +199,11 @@ class FournisseurRIBViewSet(AuditModelViewSet):
 
 
 class DemandeViewSet(AuditModelViewSet):
-    queryset = Demande.objects.select_related('id_departement').all().order_by('-date_creation')
+    queryset = Demande.objects.select_related('id_departement').prefetch_related(
+        'lignes__id_article',
+        'lignes__id_fournisseur',
+        'documents',
+    ).all().order_by('-date_creation')
     serializer_class = DemandeSerializer
     audit_prefix = 'demande'
     audit_type = 'DEMANDE'
@@ -207,7 +217,12 @@ class DemandeViewSet(AuditModelViewSet):
         if numero:
             qs = qs.filter(numero_demande__icontains=numero)
         if statut:
-            qs = qs.filter(statut_demande=statut)
+            statut_normalise = {
+                'en_cours': StatutDemande.EN_TRAITEMENT,
+                'rejecter': StatutDemande.REJETER,
+                'bouillon': StatutDemande.BROUILLON,
+            }.get(statut, statut)
+            qs = qs.filter(statut_demande=statut_normalise)
         if departement:
             qs = qs.filter(id_departement_id=departement)
         if search:
@@ -217,9 +232,15 @@ class DemandeViewSet(AuditModelViewSet):
     @action(detail=True, methods=['post'], url_path='transfer')
     def transfer(self, request, pk=None):
         departement_id = request.data.get('departement_id')
+        raison = (request.data.get('raison') or '').strip()
         if not departement_id:
             return Response(
                 {'detail': 'Le champ departement_id est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not raison:
+            return Response(
+                {'detail': 'Le champ raison est requis.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -232,16 +253,25 @@ class DemandeViewSet(AuditModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        departement_source = demande.id_departement
         with transaction.atomic():
             demande.id_departement = departement
             demande.save(update_fields=['id_departement'])
+            Transfert.objects.create(
+                departement_source=departement_source,
+                departement_beneficiaire=departement,
+                statut=StatutTransfert.VALIDE,
+                raison=raison,
+                agent=request.user,
+                id_demande=demande,
+            )
             log_audit(
                 request.user,
                 'demande_transfer',
                 type_objet=self.audit_type,
                 id_objet=demande.id,
                 request=request,
-                details=f'Transfert vers le département {departement.id}',
+                details=f'Transfert vers le département {departement.id} | raison: {raison}',
             )
 
         serializer = self.get_serializer(demande)
@@ -328,6 +358,41 @@ class SignatureNumeriqueViewSet(AuditModelViewSet):
         return qs
 
 
+class TransfertViewSet(AuditModelViewSet):
+    queryset = Transfert.objects.select_related(
+        'departement_source',
+        'departement_beneficiaire',
+        'agent',
+        'id_demande',
+        'id_bc',
+    ).all().order_by('-date_transfert')
+    serializer_class = TransfertSerializer
+    audit_prefix = 'transfert'
+    audit_type = 'TRANSFERT'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        demande = self.request.GET.get('demande_id')
+        bc = self.request.GET.get('bc_id')
+        source = self.request.GET.get('departement_source_id')
+        beneficiaire = self.request.GET.get('departement_beneficiaire_id')
+        agent = self.request.GET.get('agent_id')
+        statut = self.request.GET.get('statut')
+        if demande:
+            qs = qs.filter(id_demande_id=demande)
+        if bc:
+            qs = qs.filter(id_bc_id=bc)
+        if source:
+            qs = qs.filter(departement_source_id=source)
+        if beneficiaire:
+            qs = qs.filter(departement_beneficiaire_id=beneficiaire)
+        if agent:
+            qs = qs.filter(agent_id=agent)
+        if statut:
+            qs = qs.filter(statut=statut)
+        return qs
+
+
 class BonCommandeViewSet(AuditModelViewSet):
     queryset = BonCommande.objects.select_related(
         'id_demande',
@@ -338,6 +403,10 @@ class BonCommandeViewSet(AuditModelViewSet):
         'id_ligne_budgetaire',
         'id_redacteur',
         'id_demande_valider',
+    ).prefetch_related(
+        'lignes__id_article',
+        'lignes__id_devise',
+        'documents',
     ).all().order_by('-date_creation')
     serializer_class = BonCommandeSerializer
     audit_prefix = 'bon_commande'
@@ -352,19 +421,118 @@ class BonCommandeViewSet(AuditModelViewSet):
         if numero:
             qs = qs.filter(numero_bc__icontains=numero)
         if statut:
-            qs = qs.filter(statut_bc=statut)
+            statut_normalise = {
+                'en_redaction': StatutBC.EN_ATTENTE,
+                'en_signature': StatutBC.EN_TRAITEMENT,
+                'signe': StatutBC.VALIDER,
+                'envoye': StatutBC.VALIDER,
+                'receptionne': StatutBC.VALIDER,
+            }.get(statut, statut)
+            qs = qs.filter(statut_bc=statut_normalise)
         if fournisseur:
             qs = qs.filter(id_fournisseur_id=fournisseur)
         if departement:
             qs = qs.filter(id_departement_id=departement)
         return qs
 
+
+class DashboardView(APIView):
+    """
+    Endpoint de synthèse : métriques et dernières demandes/BC.
+    """
+
+    def get(self, request, format=None):
+        demandes_qs = Demande.objects.select_related('id_departement').prefetch_related('lignes', 'documents')
+        bc_qs = BonCommande.objects.select_related(
+            'id_demande',
+            'id_fournisseur',
+            'id_departement',
+            'id_methode_paiement',
+            'id_devise',
+            'id_ligne_budgetaire',
+            'id_redacteur',
+            'id_demande_valider',
+        ).prefetch_related('lignes', 'documents')
+
+        demande_par_statut = dict(
+            demandes_qs.values_list('statut_demande').annotate(total=models.Count('id'))
+        )
+        bc_par_statut = dict(bc_qs.values_list('statut_bc').annotate(total=models.Count('id')))
+
+        demandes_by_status = {}
+        for key, statut in {
+            'en_attente': StatutDemande.EN_ATTENTE,
+            'en_traitement': StatutDemande.EN_TRAITEMENT,
+            'en_cours': StatutDemande.EN_TRAITEMENT,  # alias compat
+            'valider': StatutDemande.VALIDER,
+            'rejeter': StatutDemande.REJETER,
+        }.items():
+            demandes_by_status[key] = DemandeSerializer(
+                demandes_qs.filter(statut_demande=statut).order_by('-date_creation')[:5],
+                many=True,
+            ).data
+
+        bc_by_status = {}
+        for key, statut in {
+            'en_attente': StatutBC.EN_ATTENTE,
+            'en_traitement': StatutBC.EN_TRAITEMENT,
+            'en_cours': StatutBC.EN_TRAITEMENT,  # alias compat
+            'valider': StatutBC.VALIDER,
+        }.items():
+            bc_by_status[key] = BonCommandeSerializer(
+                bc_qs.filter(statut_bc=statut).order_by('-date_creation')[:5],
+                many=True,
+            ).data
+
+        data = {
+            'metrics': {
+                'demandes_total': demandes_qs.count(),
+                'demandes_par_statut': demande_par_statut,
+                'bons_commande_total': bc_qs.count(),
+                'bons_commande_par_statut': bc_par_statut,
+                'lignes_demande_total': LigneDemande.objects.count(),
+                'lignes_bc_total': LigneBC.objects.count(),
+                'documents_total': Document.objects.count(),
+                'transferts_total': Transfert.objects.count(),
+                'factures_total': Facture.objects.count(),
+                'paiements_total': Paiement.objects.count(),
+                'fournisseurs_total': Fournisseur.objects.count(),
+                'articles_total': Article.objects.count(),
+                'devises_total': Devise.objects.count(),
+                'departements_total': Departement.objects.count(),
+                'categories_total': Categorie.objects.count(),
+                'methodes_paiement_total': MethodePaiement.objects.count(),
+                'banques_total': Banque.objects.count(),
+                'fournisseurs_rib_total': FournisseurRIB.objects.count(),
+                'signatures_numeriques_total': SignatureNumerique.objects.count(),
+                'signatures_bc_total': SignatureBC.objects.count(),
+                'lignes_budgetaires_total': LigneBudgetaire.objects.count(),
+            },
+            'dernieres_demandes': DemandeSerializer(
+                demandes_qs.order_by('-date_creation')[:5],
+                many=True,
+            ).data,
+            'derniers_bons_commande': BonCommandeSerializer(
+                bc_qs.order_by('-date_creation')[:5],
+                many=True,
+            ).data,
+            'dernieres_demandes_par_statut': demandes_by_status,
+            'derniers_bons_commande_par_statut': bc_by_status,
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['post'], url_path='transfer')
     def transfer(self, request, pk=None):
         departement_id = request.data.get('departement_id')
+        raison = (request.data.get('raison') or '').strip()
         if not departement_id:
             return Response(
                 {'detail': 'Le champ departement_id est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not raison:
+            return Response(
+                {'detail': 'Le champ raison est requis.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -377,6 +545,7 @@ class BonCommandeViewSet(AuditModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        departement_source = bc.id_departement
         with transaction.atomic():
             bc.id_departement = departement
             bc.save(update_fields=['id_departement'])
@@ -385,6 +554,15 @@ class BonCommandeViewSet(AuditModelViewSet):
                 bc.id_demande.id_departement = departement
                 bc.id_demande.save(update_fields=['id_departement'])
                 demande_updated = True
+            Transfert.objects.create(
+                departement_source=departement_source,
+                departement_beneficiaire=departement,
+                statut=StatutTransfert.VALIDE,
+                raison=raison,
+                agent=request.user,
+                id_bc=bc,
+                id_demande=bc.id_demande,
+            )
 
             log_audit(
                 request.user,
@@ -395,6 +573,7 @@ class BonCommandeViewSet(AuditModelViewSet):
                 details=(
                     f'Transfert vers le département {departement.id}'
                     + (' avec mise à jour de la demande liée' if demande_updated else '')
+                    + f' | raison: {raison}'
                 ),
             )
 

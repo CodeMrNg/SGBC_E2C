@@ -8,6 +8,7 @@ from .bon_commande import BonCommande, LigneBC, SignatureBC
 from .facturation_paiement import Facture, Paiement
 from .budget import LigneBudgetaire
 from .audit import HistoriqueStatut, AuditLog
+from .transferts import Transfert
 from .security import TwoFactorCode, TwoFactorMethod
 
 __all__ = [
@@ -36,6 +37,7 @@ __all__ = [
     'LigneBudgetaire',
     'HistoriqueStatut',
     'AuditLog',
+    'Transfert',
     'TwoFactorCode',
     'TwoFactorMethod',
 ]

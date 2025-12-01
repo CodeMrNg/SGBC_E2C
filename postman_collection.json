@@ -1488,7 +1488,39 @@
                 "value": "Bearer {{access}}"
               }
             ],
-            "url": "{{base_url}}/demandes/?numero=DM&statut=en_cours"
+            "url": {
+              "raw": "{{base_url}}/demandes/?statut=en_attente",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "demandes",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "statut",
+                  "value": "en_attente",
+                  "description": "brouillon | en_attente | en_traitement | valider | rejeter"
+                },
+                {
+                  "key": "numero",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filtre partiel numero"
+                },
+                {
+                  "key": "departement_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
           }
         },
         {
@@ -1576,7 +1608,7 @@
             "url": "{{base_url}}/demandes/{{demande_id}}/transfer/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"departement_id\": \"{{departement_id}}\"\n}"
+              "raw": "{\n  \"departement_id\": \"{{departement_id}}\",\n  \"raison\": \"Justification du transfert\"\n}"
             }
           }
         }
@@ -1939,7 +1971,39 @@
                 "value": "Bearer {{access}}"
               }
             ],
-            "url": "{{base_url}}/bons-commande/?numero=BC&statut=en_signature"
+            "url": {
+              "raw": "{{base_url}}/bons-commande/?statut=en_attente",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bons-commande",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "statut",
+                  "value": "en_attente",
+                  "description": "en_attente | en_traitement | valider"
+                },
+                {
+                  "key": "numero",
+                  "value": "",
+                  "disabled": true,
+                  "description": "Filtre partiel numero"
+                },
+                {
+                  "key": "fournisseur_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "departement_id",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
           }
         },
         {
@@ -2027,7 +2091,7 @@
             "url": "{{base_url}}/bons-commande/{{bc_id}}/transfer/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"departement_id\": \"{{departement_id}}\"\n}"
+              "raw": "{\n  \"departement_id\": \"{{departement_id}}\",\n  \"raison\": \"Justification du transfert\"\n}"
             }
           }
         }
@@ -2373,6 +2437,116 @@
               }
             ],
             "url": "{{base_url}}/paiements/{{paiement_id}}/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Dashboard - Metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transferts",
+      "item": [
+        {
+          "name": "Transferts - List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transferts/?statut=valide",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transferts",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "demande_id",
+                  "value": "{{demande_id}}",
+                  "disabled": true
+                },
+                {
+                  "key": "bc_id",
+                  "value": "{{bc_id}}",
+                  "disabled": true
+                },
+                {
+                  "key": "departement_source_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "departement_beneficiaire_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "agent_id",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "statut",
+                  "value": "valide",
+                  "description": "valide | rejete",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Transferts - Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transferts/{{transfert_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transferts",
+                "{{transfert_id}}",
+                ""
+              ]
+            }
           }
         }
       ]

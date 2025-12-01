@@ -1,3 +1,4 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from ..views.resources import (
@@ -5,6 +6,7 @@ from ..views.resources import (
     BanqueViewSet,
     BonCommandeViewSet,
     CategorieViewSet,
+    DashboardView,
     DemandeViewSet,
     DeviseViewSet,
     DocumentViewSet,
@@ -18,6 +20,7 @@ from ..views.resources import (
     PaiementViewSet,
     SignatureBCViewSet,
     SignatureNumeriqueViewSet,
+    TransfertViewSet,
 )
 
 router = DefaultRouter()
@@ -38,5 +41,8 @@ router.register(r'lignes-bc', LigneBCViewSet, basename='lignes-bc')
 router.register(r'signatures-bc', SignatureBCViewSet, basename='signatures-bc')
 router.register(r'factures', FactureViewSet, basename='factures')
 router.register(r'paiements', PaiementViewSet, basename='paiements')
+router.register(r'transferts', TransfertViewSet, basename='transferts')
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path('dashboard/', DashboardView.as_view(), name='dashboard'),
+]

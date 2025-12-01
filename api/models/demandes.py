@@ -4,10 +4,11 @@ from django.db import models
 
 
 class StatutDemande(models.TextChoices):
+    BROUILLON = ('brouillon', 'Brouillon')
     EN_ATTENTE = ('en_attente', 'En attente')
-    EN_COURS = ('en_cours', 'En cours')
+    EN_TRAITEMENT = ('en_traitement', 'En traitement')
     VALIDER = ('valider', 'Valider')
-    REJETER = ('rejecter', 'Rejecter')
+    REJETER = ('rejeter', 'Rejeter')
 
 
 class Demande(models.Model):
@@ -17,6 +18,7 @@ class Demande(models.Model):
     description = models.TextField(blank=True)
     source = models.CharField(max_length=150, blank=True, default='')
     date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
     date_validation_budget = models.DateTimeField(null=True, blank=True)
     statut_demande = models.CharField(
         max_length=20,
@@ -27,6 +29,11 @@ class Demande(models.Model):
         'Departement',
         on_delete=models.PROTECT,
         related_name='demandes',
+    )
+    documents = models.ManyToManyField(
+        'Document',
+        related_name='demandes',
+        blank=True,
     )
 
     def __str__(self) -> str:

@@ -31,6 +31,7 @@ from .models import (
     RolePermission,
     SignatureBC,
     SignatureNumerique,
+    Transfert,
     TwoFactorCode,
     Utilisateur,
 )
@@ -295,10 +296,11 @@ class DemandeAdmin(admin.ModelAdmin):
         'id_departement',
         'statut_demande',
         'date_creation',
+        'date_modification',
         'date_validation_budget',
     )
     search_fields = ('numero_demande', 'objet', 'description', 'source')
-    list_filter = ('statut_demande', 'id_departement', 'date_creation')
+    list_filter = ('statut_demande', 'id_departement', 'date_creation', 'date_modification')
 
 
 @admin.register(LigneDemande)
@@ -318,10 +320,11 @@ class BonCommandeAdmin(admin.ModelAdmin):
         'statut_bc',
         'date_bc',
         'date_creation',
+        'date_modification',
         'echeance',
     )
     search_fields = ('numero_bc',)
-    list_filter = ('statut_bc', 'id_departement', 'id_fournisseur')
+    list_filter = ('statut_bc', 'id_departement', 'id_fournisseur', 'date_modification')
 
 
 @admin.register(LigneBC)
@@ -373,6 +376,27 @@ class LigneBudgetaireAdmin(admin.ModelAdmin):
     )
     search_fields = ('code_ligne', 'chapitre', 'article_budgetaire')
     list_filter = ('exercice', 'id_departement')
+
+
+@admin.register(Transfert)
+class TransfertAdmin(admin.ModelAdmin):
+    list_display = (
+        'departement_source',
+        'departement_beneficiaire',
+        'statut',
+        'agent',
+        'id_demande',
+        'id_bc',
+        'date_transfert',
+    )
+    search_fields = (
+        'departement_source__nom',
+        'departement_beneficiaire__nom',
+        'id_demande__numero_demande',
+        'id_bc__numero_bc',
+        'raison',
+    )
+    list_filter = ('statut', 'departement_source', 'departement_beneficiaire', 'agent', 'date_transfert')
 
 
 @admin.register(HistoriqueStatut)

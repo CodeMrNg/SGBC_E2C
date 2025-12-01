@@ -5,11 +5,9 @@ from django.db import models
 
 
 class StatutBC(models.TextChoices):
-    EN_REDACTION = ('en_redaction', 'En redaction')
-    EN_SIGNATURE = ('en_signature', 'En signature')
-    SIGNE = ('signe', 'Signe')
-    ENVOYE = ('envoye', 'Envoye')
-    RECEPTIONNE = ('receptionne', 'Receptionne')
+    EN_ATTENTE = ('en_attente', 'En attente')
+    EN_TRAITEMENT = ('en_traitement', 'En traitement')
+    VALIDER = ('valider', 'Valider')
 
 
 class DecisionSignature(models.TextChoices):
@@ -83,21 +81,27 @@ class BonCommande(models.Model):
     type_achat = models.CharField(max_length=100, blank=True)
     date_bc = models.DateField(null=True, blank=True)
     date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
     transit = models.BooleanField(default=False)
     echeance = models.DateField(null=True, blank=True)
     date_envoi_fournisseur = models.DateField(null=True, blank=True)
     conditions_paiement = models.TextField(blank=True)
     delai_livraison = models.CharField(max_length=100, blank=True)
-    lieu_livraison = models.CharField(max_length=150, blank=True)
+    lieu_livraison = models.CharField(max_length=150, blank=True,null=True)
     statut_bc = models.CharField(
         max_length=20,
         choices=StatutBC.choices,
-        default=StatutBC.EN_REDACTION,
+        default=StatutBC.EN_ATTENTE,
     )
     id_redacteur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name='bons_commande_rediges',
+    )
+    documents = models.ManyToManyField(
+        'Document',
+        related_name='bons_commande',
+        blank=True,
     )
 
     def __str__(self) -> str:

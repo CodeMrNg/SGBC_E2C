@@ -18,6 +18,7 @@ from ..models import (
     Paiement,
     SignatureBC,
     SignatureNumerique,
+    Transfert,
 )
 
 
@@ -63,12 +64,6 @@ class FournisseurRIBSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class DemandeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Demande
-        fields = '__all__'
-
-
 class LigneDemandeSerializer(serializers.ModelSerializer):
     class Meta:
         model = LigneDemande
@@ -93,15 +88,27 @@ class SignatureNumeriqueSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class BonCommandeSerializer(serializers.ModelSerializer):
+class DemandeSerializer(serializers.ModelSerializer):
+    lignes = LigneDemandeSerializer(many=True, read_only=True)
+    documents = DocumentSerializer(many=True, read_only=True)
+
     class Meta:
-        model = BonCommande
+        model = Demande
         fields = '__all__'
 
 
 class LigneBCSerializer(serializers.ModelSerializer):
     class Meta:
         model = LigneBC
+        fields = '__all__'
+
+
+class BonCommandeSerializer(serializers.ModelSerializer):
+    lignes = LigneBCSerializer(many=True, read_only=True)
+    documents = DocumentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = BonCommande
         fields = '__all__'
 
 
@@ -120,4 +127,10 @@ class FactureSerializer(serializers.ModelSerializer):
 class PaiementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Paiement
+        fields = '__all__'
+
+
+class TransfertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transfert
         fields = '__all__'
