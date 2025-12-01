@@ -361,7 +361,55 @@
                 "value": "Bearer {{access}}"
               }
             ],
-            "url": "{{base_url}}/audit/logs/"
+            "url": {
+              "raw": "{{base_url}}/audit/logs/?user_id={{user_id}}&type_objet=DEMANDE&action=demande_create&date_min=2025-01-01&date_max=2025-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "audit",
+                "logs",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{user_id}}",
+                  "disabled": false,
+                  "description": "Filtrer par utilisateur"
+                },
+                {
+                  "key": "type_objet",
+                  "value": "DEMANDE",
+                  "disabled": false,
+                  "description": "Type objet"
+                },
+                {
+                  "key": "action",
+                  "value": "demande_create",
+                  "disabled": false,
+                  "description": "Action"
+                },
+                {
+                  "key": "id_objet",
+                  "value": "",
+                  "disabled": true,
+                  "description": "ID objet"
+                },
+                {
+                  "key": "date_min",
+                  "value": "2025-01-01",
+                  "disabled": false,
+                  "description": "Date min (YYYY-MM-DD ou ISO)"
+                },
+                {
+                  "key": "date_max",
+                  "value": "2025-12-31",
+                  "disabled": false,
+                  "description": "Date max (YYYY-MM-DD ou ISO)"
+                }
+              ]
+            }
           }
         },
         {
