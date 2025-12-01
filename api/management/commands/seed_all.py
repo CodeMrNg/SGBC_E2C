@@ -20,7 +20,9 @@ from api.models import (
     LigneDemande,
     MethodePaiement,
     Paiement,
+    Role,
     SignatureBC,
+    Transfert,
 )
 
 
@@ -166,6 +168,13 @@ BANQUES_DATA = [
     {"code_banque": "B002", "nom": "Banque B", "code_swift": "BKBFRAB1"},
 ]
 
+ROLES_DATA = [
+    {"code": "ADMIN", "libelle": "Administrateur"},
+    {"code": "ACH", "libelle": "Acheteur"},
+    {"code": "FIN", "libelle": "Financier"},
+    {"code": "DSI", "libelle": "Responsable IT"},
+]
+
 
 class Command(BaseCommand):
     help = "Seed de données de démonstration sur l'ensemble des modèles principaux."
@@ -177,7 +186,8 @@ class Command(BaseCommand):
         categorie_map = self._seed_categories()
         fournisseur_map = self._seed_fournisseurs()
         banque_map = self._seed_banques()
-        user = self._seed_user(dep_map.get("DG"))
+        role_map = self._seed_roles()
+        user = self._seed_user(dep_map.get("DG"), role_map.get("ADMIN"))
 
         # Articles
         article_laptop = Article.objects.update_or_create(
@@ -241,6 +251,20 @@ class Command(BaseCommand):
                 "montant_budget": Decimal("80000000"),
                 "montant_engage": Decimal("0"),
                 "montant_reste": Decimal("80000000"),
+            },
+        )[0]
+        lb3 = LigneBudgetaire.objects.update_or_create(
+            code_ligne="LB-2025-DPT-001",
+            defaults={
+                "exercice": 2025,
+                "chapitre": "Production",
+                "article_budgetaire": "Transport",
+                "paragraphe": "Maintenance",
+                "id_departement": dep_map["DPT"],
+                "id_devise": devise_map["XAF"],
+                "montant_budget": Decimal("50000000"),
+                "montant_engage": Decimal("0"),
+                "montant_reste": Decimal("50000000"),
             },
         )[0]
 
@@ -321,6 +345,31 @@ class Command(BaseCommand):
             },
         )
 
+        # Demande 3
+        demande3 = Demande.objects.update_or_create(
+            numero_demande="DM-003",
+            defaults={
+                "objet": "Maintenance flotte véhicules",
+                "description": "Révision annuelle des véhicules",
+                "source": "Interne",
+                "id_departement": dep_map["DPT"],
+                "statut_demande": "en_attente",
+            },
+        )[0]
+
+        LigneDemande.objects.update_or_create(
+            id_demande=demande3,
+            designation="Révision 10 véhicules",
+            defaults={
+                "id_article": article_service,
+                "id_fournisseur": fournisseur_map["F003"],
+                "quantite": Decimal("10"),
+                "prix_unitaire_estime": Decimal("150000"),
+                "id_devise": devise_map["XAF"],
+                "commentaire": "Inclut pièces et main d'œuvre",
+            },
+        )
+
         # Bon de commande 1
         bc = BonCommande.objects.update_or_create(
             numero_bc="BC-001",
@@ -388,6 +437,34 @@ class Command(BaseCommand):
             },
         )
 
+        # Bon de commande 3
+        bc3 = BonCommande.objects.update_or_create(
+            numero_bc="BC-003",
+            defaults={
+                "id_demande": demande3,
+                "id_fournisseur": fournisseur_map["F003"],
+                "id_departement": dep_map["DPT"],
+                "id_devise": devise_map["XAF"],
+                "id_methode_paiement": methode_map["CB"],
+                "id_ligne_budgetaire": lb3,
+                "id_redacteur": user,
+                "montant_engage": Decimal("1500000"),
+                "statut_bc": "en_attente",
+            },
+        )[0]
+
+        LigneBC.objects.update_or_create(
+            id_bc=bc3,
+            designation="Révision véhicule utilitaire",
+            defaults={
+                "id_article": article_service,
+                "quantite": Decimal("5"),
+                "prix_unitaire": Decimal("150000"),
+                "id_devise": devise_map["XAF"],
+                "prix_net": Decimal("750000"),
+            },
+        )
+
         # Document
         doc = Document.objects.update_or_create(
             reference_fonctionnelle="BC-DOC-001",
@@ -443,6 +520,16 @@ class Command(BaseCommand):
                 "date_facture": "2025-02-01",
             },
         )[0]
+        facture3 = Facture.objects.update_or_create(
+            id_bc=bc3,
+            numero_facture="FAC-003",
+            defaults={
+                "id_devise": devise_map["XAF"],
+                "montant_ht": Decimal("750000"),
+                "montant_ttc": Decimal("750000"),
+                "date_facture": "2025-03-01",
+            },
+        )[0]
 
         # Paiement
         Paiement.objects.update_or_create(
@@ -461,6 +548,47 @@ class Command(BaseCommand):
             defaults={
                 "montant": Decimal("950000"),
                 "reference_virement": "CHQ-002",
+            },
+        )
+        Paiement.objects.update_or_create(
+            id_facture=facture3,
+            id_banque=banque_map["B001"],
+            id_methode_paiement=methode_map["CB"],
+            defaults={
+                "montant": Decimal("750000"),
+                "reference_virement": "CB-003",
+            },
+        )
+
+        # Transferts
+        Transfert.objects.update_or_create(
+            id_demande=demande2,
+            departement_source=dep_map["DSI"],
+            departement_beneficiaire=dep_map["DAA"],
+            defaults={
+                "statut": "valide",
+                "raison": "Traitement budgétaire centralisé",
+                "agent": user,
+            },
+        )
+        Transfert.objects.update_or_create(
+            id_bc=bc2,
+            departement_source=dep_map["DSI"],
+            departement_beneficiaire=dep_map["DAA"],
+            defaults={
+                "statut": "valide",
+                "raison": "Alignement achats",
+                "agent": user,
+            },
+        )
+        Transfert.objects.update_or_create(
+            id_demande=demande3,
+            departement_source=dep_map["DPT"],
+            departement_beneficiaire=dep_map["DAA"],
+            defaults={
+                "statut": "valide",
+                "raison": "Centralisation des commandes",
+                "agent": user,
             },
         )
 
@@ -550,7 +678,7 @@ class Command(BaseCommand):
             b_map[entry["code_banque"]] = obj
         return b_map
 
-    def _seed_user(self, departement):
+    def _seed_user(self, departement, role=None):
         User = get_user_model()
         user, created = User.objects.get_or_create(
             login="demoadmin",
@@ -560,6 +688,7 @@ class Command(BaseCommand):
                 "first_name": "Demo",
                 "last_name": "Admin",
                 "id_departement": departement,
+                "id_role": role,
                 "is_staff": True,
                 "is_superuser": False,
                 "is_active": True,
@@ -569,3 +698,13 @@ class Command(BaseCommand):
             user.set_password("password123")
             user.save()
         return user
+
+    def _seed_roles(self):
+        role_map = {}
+        for entry in ROLES_DATA:
+            obj, _ = Role.objects.update_or_create(
+                code=entry["code"],
+                defaults={"libelle": entry["libelle"], "description": entry.get("description", "")},
+            )
+            role_map[entry["code"]] = obj
+        return role_map
