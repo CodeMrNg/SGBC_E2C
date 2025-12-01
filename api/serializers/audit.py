@@ -17,6 +17,7 @@ from ..models import (
     SignatureNumerique,
     Transfert,
 )
+from .resources import BonCommandeSerializer, DemandeSerializer, TransfertSerializer
 
 
 class AuditLogSerializer(serializers.ModelSerializer):
@@ -76,9 +77,23 @@ class AuditLogSerializer(serializers.ModelSerializer):
         """
         Retourne des informations minimales sur l'objet audité (id, label).
         """
+        type_upper = (obj.type_objet or '').upper()
+        if not obj.id_objet:
+            return None
+
+        # Cas spécifiques avec sérialisation enrichie
+        if type_upper == 'TRANSFERT':
+            instance = Transfert.objects.filter(pk=obj.id_objet).first()
+            return TransfertSerializer(instance).data if instance else None
+        if type_upper == 'DEMANDE':
+            instance = Demande.objects.filter(pk=obj.id_objet).first()
+            return DemandeSerializer(instance).data if instance else None
+        if type_upper == 'BON_COMMANDE':
+            instance = BonCommande.objects.filter(pk=obj.id_objet).first()
+            return BonCommandeSerializer(instance).data if instance else None
+
+        # Autres objets : retour minimal id/label
         mapping = {
-            'DEMANDE': Demande,
-            'BON_COMMANDE': BonCommande,
             'ARTICLE': Article,
             'DOCUMENT': Document,
             'FACTURE': Facture,
@@ -88,12 +103,11 @@ class AuditLogSerializer(serializers.ModelSerializer):
             'LIGNE_BC': LigneBC,
             'SIGNATURE_BC': SignatureBC,
             'SIGNATURE_NUMERIQUE': SignatureNumerique,
-            'TRANSFERT': Transfert,
             'DEPARTEMENT': Departement,
             'METHODE_PAIEMENT': MethodePaiement,
         }
-        model = mapping.get((obj.type_objet or '').upper())
-        if not model or not obj.id_objet:
+        model = mapping.get(type_upper)
+        if not model:
             return None
         instance = model.objects.filter(pk=obj.id_objet).first()
         if not instance:

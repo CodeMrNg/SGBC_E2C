@@ -20,6 +20,8 @@ from ..models import (
     SignatureNumerique,
     Transfert,
 )
+from .organisation import DepartementSerializer
+from .auth import UserSerializer
 
 
 class BaseDepthSerializer(serializers.ModelSerializer):
@@ -121,5 +123,11 @@ class PaiementSerializer(BaseDepthSerializer):
 
 
 class TransfertSerializer(BaseDepthSerializer):
+    departement_source = DepartementSerializer(read_only=True)
+    departement_beneficiaire = DepartementSerializer(read_only=True)
+    agent = UserSerializer(read_only=True)
+    id_demande = DemandeSerializer(read_only=True)
+    id_bc = BonCommandeSerializer(read_only=True)
+
     class Meta(BaseDepthSerializer.Meta):
         model = Transfert
