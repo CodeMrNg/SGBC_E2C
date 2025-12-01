@@ -31,11 +31,22 @@ class Departement(models.Model):
                 max_seq = max(max_seq, int(m.group(1)))
         return max_seq + 1
 
+    @staticmethod
+    def _sigle_from_nom(nom: str) -> str:
+        """Construit un sigle à partir du nom (ex: 'Direction Generale' -> 'DG')."""
+        words = re.findall(r'[A-Za-zÀ-ÖØ-öø-ÿ]+', nom or '')
+        if words:
+            sigle = ''.join(w[0] for w in words if w).upper()
+            if sigle:
+                return sigle[:6]
+        base = slugify(nom).upper().replace('-', '') or 'DEP'
+        return base[:6]
+
     @classmethod
     def generate_code(cls, nom: str) -> str:
-        base = slugify(nom).upper().replace('-', '') or 'DEPT'
+        base = cls._sigle_from_nom(nom)
         seq = cls._next_seq_for_code(base)
-        return f'{base}-{seq:03d}'
+        return base if seq == 1 else f'{base}-{seq:02d}'
 
     @classmethod
     def generate_slug(cls, nom: str, current_id=None) -> str:

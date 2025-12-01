@@ -503,7 +503,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/departements/?actif=true&code=DEP-001&slug=it-dep&search=info",
+              "raw": "{{base_url}}/departements/?actif=true&code=DG&slug=dg&search=dg",
               "host": [
                 "{{base_url}}"
               ],
@@ -524,17 +524,17 @@
                 },
                 {
                   "key": "code",
-                  "value": "DEP-001",
+                  "value": "DG",
                   "disabled": false
                 },
                 {
                   "key": "slug",
-                  "value": "it-dep",
+                  "value": "dg",
                   "disabled": false
                 },
                 {
                   "key": "search",
-                  "value": "info",
+                  "value": "dg",
                   "disabled": false
                 }
               ]
@@ -558,7 +558,7 @@
             "url": "{{base_url}}/departements/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nom\": \"Informatique\",\n  \"description\": \"Dept IT\",\n  \"actif\": true\n}"
+              "raw": "{\n  \"nom\": \"Direction Generale\",\n  \"description\": \"DG\",\n  \"actif\": true\n}"
             }
           }
         },
