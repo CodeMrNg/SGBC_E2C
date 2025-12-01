@@ -22,79 +22,73 @@ from ..models import (
 )
 
 
-class DeviseSerializer(serializers.ModelSerializer):
+class BaseDepthSerializer(serializers.ModelSerializer):
     class Meta:
+        depth = 1
+        fields = '__all__'
+
+
+class DeviseSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = Devise
-        fields = '__all__'
 
 
-class MethodePaiementSerializer(serializers.ModelSerializer):
-    class Meta:
+class MethodePaiementSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = MethodePaiement
-        fields = '__all__'
 
 
-class CategorieSerializer(serializers.ModelSerializer):
-    class Meta:
+class CategorieSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = Categorie
-        fields = '__all__'
 
 
-class ArticleSerializer(serializers.ModelSerializer):
-    class Meta:
+class ArticleSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = Article
-        fields = '__all__'
 
 
-class FournisseurSerializer(serializers.ModelSerializer):
-    class Meta:
+class FournisseurSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = Fournisseur
-        fields = '__all__'
 
 
-class BanqueSerializer(serializers.ModelSerializer):
-    class Meta:
+class BanqueSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = Banque
-        fields = '__all__'
 
 
-class FournisseurRIBSerializer(serializers.ModelSerializer):
-    class Meta:
+class FournisseurRIBSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = FournisseurRIB
-        fields = '__all__'
 
 
-class LigneDemandeSerializer(serializers.ModelSerializer):
-    class Meta:
+class LigneDemandeSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = LigneDemande
-        fields = '__all__'
 
 
-class LigneBudgetaireSerializer(serializers.ModelSerializer):
-    class Meta:
+class LigneBudgetaireSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = LigneBudgetaire
-        fields = '__all__'
 
 
-class DocumentSerializer(serializers.ModelSerializer):
-    class Meta:
+class DocumentSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = Document
-        fields = '__all__'
 
 
-class SignatureNumeriqueSerializer(serializers.ModelSerializer):
-    class Meta:
+class SignatureNumeriqueSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = SignatureNumerique
-        fields = '__all__'
 
 
-class DemandeSerializer(serializers.ModelSerializer):
+class DemandeSerializer(BaseDepthSerializer):
     lignes = LigneDemandeSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
 
-    class Meta:
+    class Meta(BaseDepthSerializer.Meta):
         model = Demande
-        fields = '__all__'
 
 
 class LigneBCSerializer(serializers.ModelSerializer):
@@ -103,13 +97,12 @@ class LigneBCSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class BonCommandeSerializer(serializers.ModelSerializer):
+class BonCommandeSerializer(BaseDepthSerializer):
     lignes = LigneBCSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
 
-    class Meta:
+    class Meta(BaseDepthSerializer.Meta):
         model = BonCommande
-        fields = '__all__'
         read_only_fields = ('numero_bc',)
 
 
