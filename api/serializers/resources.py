@@ -110,6 +110,7 @@ class BonCommandeSerializer(serializers.ModelSerializer):
     class Meta:
         model = BonCommande
         fields = '__all__'
+        read_only_fields = ('numero_bc',)
 
 
 class SignatureBCSerializer(serializers.ModelSerializer):

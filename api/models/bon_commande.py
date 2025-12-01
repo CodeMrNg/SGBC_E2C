@@ -1,4 +1,6 @@
+import re
 import uuid
+from datetime import datetime
 
 from django.conf import settings
 from django.db import models
@@ -18,7 +20,7 @@ class DecisionSignature(models.TextChoices):
 
 class BonCommande(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    numero_bc = models.CharField(max_length=100, unique=True)
+    numero_bc = models.CharField(max_length=100, unique=True, blank=True)
     id_demande = models.ForeignKey(
         'Demande',
         on_delete=models.PROTECT,
@@ -106,6 +108,31 @@ class BonCommande(models.Model):
 
     def __str__(self) -> str:
         return self.numero_bc
+
+    @staticmethod
+    def _next_sequence_for_year(year: int) -> int:
+        """
+        Retourne le prochain numéro séquentiel pour l'année donnée en se basant
+        sur la première partie de numero_bc (ex: 82/DAA/DG/2025 -> 82).
+        """
+        existing = BonCommande.objects.filter(numero_bc__endswith=f'/{year}').values_list('numero_bc', flat=True)
+        max_seq = 0
+        for numero in existing:
+            match = re.match(r'^(\\d+)', numero or '')
+            if match:
+                max_seq = max(max_seq, int(match.group(1)))
+        return max_seq + 1
+
+    @classmethod
+    def generate_numero_bc(cls) -> str:
+        year = datetime.now().year
+        sequence = cls._next_sequence_for_year(year)
+        return f'{sequence}/DAA/DG/{year}'
+
+    def save(self, *args, **kwargs):
+        if not self.numero_bc:
+            self.numero_bc = self.generate_numero_bc()
+        super().save(*args, **kwargs)
 
 
 class LigneBC(models.Model):
