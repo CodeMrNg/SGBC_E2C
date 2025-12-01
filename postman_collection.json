@@ -529,12 +529,12 @@
                 },
                 {
                   "key": "slug",
-                  "value": "dg",
+                  "value": "direction-generale",
                   "disabled": false
                 },
                 {
                   "key": "search",
-                  "value": "dg",
+                  "value": "direction",
                   "disabled": false
                 }
               ]
@@ -558,7 +558,7 @@
             "url": "{{base_url}}/departements/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nom\": \"Direction Generale\",\n  \"description\": \"DG\",\n  \"actif\": true\n}"
+              "raw": "{\n  \"nom\": \"Direction G?n?rale\",\n  \"description\": \"Supervision globale et pilotage strat?gique\",\n  \"actif\": true\n}"
             }
           }
         },
@@ -655,25 +655,13 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/roles/?code=ACH&search=achat",
+              "raw": "{{base_url}}/roles/",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "roles",
                 ""
-              ],
-              "query": [
-                {
-                  "key": "code",
-                  "value": "ACH",
-                  "disabled": false
-                },
-                {
-                  "key": "search",
-                  "value": "achat",
-                  "disabled": true
-                }
               ]
             }
           }
@@ -695,7 +683,7 @@
             "url": "{{base_url}}/roles/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"ACH\",\n  \"libelle\": \"Achats\",\n  \"description\": \"Profil Achats\"\n}"
+              "raw": "{\n  \"code\": \"ADMIN\",\n  \"libelle\": \"Administrateur\"\n}"
             }
           }
         },
@@ -1559,7 +1547,7 @@
                 {
                   "key": "statut",
                   "value": "en_attente",
-                  "description": "brouillon | en_attente | en_traitement | valider | rejeter"
+                  "description": "en_attente | en_traitement | valider | rejeter (demande), en_attente | en_traitement | valider (BC)"
                 },
                 {
                   "key": "numero",
@@ -2042,7 +2030,7 @@
                 {
                   "key": "statut",
                   "value": "en_attente",
-                  "description": "en_attente | en_traitement | valider"
+                  "description": "en_attente | en_traitement | valider | rejeter (demande), en_attente | en_traitement | valider (BC)"
                 },
                 {
                   "key": "numero",
@@ -2540,7 +2528,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/transferts/?statut=valide",
+              "raw": "{{base_url}}/transferts/?demande_id={{demande_id}}&bc_id={{bc_id}}&statut=valide",
               "host": [
                 "{{base_url}}"
               ],
@@ -2577,8 +2565,7 @@
                 {
                   "key": "statut",
                   "value": "valide",
-                  "description": "valide | rejete",
-                  "disabled": true
+                  "disabled": false
                 }
               ]
             }
