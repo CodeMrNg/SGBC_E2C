@@ -65,4 +65,32 @@ class AuditModelViewSet(
         Return the total count of resources after applying filters.
         """
         queryset = self.filter_queryset(self.get_queryset())
-        return Response({'count': queryset.count()})
+        return Response({'message': 'Compteur calculé avec succès', 'data': {'count': queryset.count()}})
+
+    @staticmethod
+    def _wrap_response(response, message: str):
+        return Response(
+            {'message': message, 'data': getattr(response, 'data', None)},
+            status=response.status_code,
+            headers=getattr(response, 'headers', None),
+        )
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        return self._wrap_response(response, 'Liste récupérée avec succès')
+
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        return self._wrap_response(response, 'Détail récupéré avec succès')
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        return self._wrap_response(response, 'Création effectuée avec succès')
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        return self._wrap_response(response, 'Mise à jour effectuée avec succès')
+
+    def destroy(self, request, *args, **kwargs):
+        response = super().destroy(request, *args, **kwargs)
+        return self._wrap_response(response, 'Suppression effectuée avec succès')

@@ -235,12 +235,12 @@ class DemandeViewSet(AuditModelViewSet):
         raison = (request.data.get('raison') or '').strip()
         if not departement_id:
             return Response(
-                {'detail': 'Le champ departement_id est requis.'},
+                {'message': 'Validation échouée', 'detail': 'Le champ departement_id est requis.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if not raison:
             return Response(
-                {'detail': 'Le champ raison est requis.'},
+                {'message': 'Validation échouée', 'detail': 'Le champ raison est requis.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -249,7 +249,7 @@ class DemandeViewSet(AuditModelViewSet):
 
         if demande.id_departement_id == departement.id:
             return Response(
-                {'detail': 'La demande est déjà rattachée à ce département.'},
+                {'message': 'Validation échouée', 'detail': 'La demande est déjà rattachée à ce département.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -275,7 +275,10 @@ class DemandeViewSet(AuditModelViewSet):
             )
 
         serializer = self.get_serializer(demande)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(
+            {'message': 'Transfert de demande effectué avec succès', 'data': serializer.data},
+            status=status.HTTP_200_OK,
+        )
 
 
 class LigneDemandeViewSet(AuditModelViewSet):
@@ -519,7 +522,7 @@ class DashboardView(APIView):
             'dernieres_demandes_par_statut': demandes_by_status,
             'derniers_bons_commande_par_statut': bc_by_status,
         }
-        return Response(data, status=status.HTTP_200_OK)
+        return Response({'message': 'Dashboard récupéré avec succès', 'data': data}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='transfer')
     def transfer(self, request, pk=None):
@@ -527,12 +530,12 @@ class DashboardView(APIView):
         raison = (request.data.get('raison') or '').strip()
         if not departement_id:
             return Response(
-                {'detail': 'Le champ departement_id est requis.'},
+                {'message': 'Validation échouée', 'detail': 'Le champ departement_id est requis.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if not raison:
             return Response(
-                {'detail': 'Le champ raison est requis.'},
+                {'message': 'Validation échouée', 'detail': 'Le champ raison est requis.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -541,7 +544,7 @@ class DashboardView(APIView):
 
         if bc.id_departement_id == departement.id:
             return Response(
-                {'detail': 'Le bon de commande est déjà rattaché à ce département.'},
+                {'message': 'Validation échouée', 'detail': 'Le bon de commande est déjà rattaché à ce département.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -578,7 +581,10 @@ class DashboardView(APIView):
             )
 
         serializer = self.get_serializer(bc)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(
+            {'message': 'Transfert de bon de commande effectué avec succès', 'data': serializer.data},
+            status=status.HTTP_200_OK,
+        )
 
 
 class LigneBCViewSet(AuditModelViewSet):
