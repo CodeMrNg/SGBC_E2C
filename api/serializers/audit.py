@@ -26,6 +26,7 @@ class AuditLogSerializer(serializers.ModelSerializer):
     utilisateur_role = serializers.SerializerMethodField()
     utilisateur_departement = serializers.SerializerMethodField()
     objet = serializers.SerializerMethodField()
+    utilisateur = serializers.SerializerMethodField()
 
     class Meta:
         model = AuditLog
@@ -44,6 +45,7 @@ class AuditLogSerializer(serializers.ModelSerializer):
             'utilisateur_role',
             'utilisateur_departement',
             'objet',
+            'utilisateur',
         ]
         read_only_fields = fields
 
@@ -99,4 +101,18 @@ class AuditLogSerializer(serializers.ModelSerializer):
         return {
             'id': str(instance.id),
             'label': str(instance),
+        }
+
+    def get_utilisateur(self, obj):
+        user = obj.id_utilisateur
+        if not user:
+            return None
+        return {
+            'id': str(user.id),
+            'login': user.login,
+            'email': user.email,
+            'nom': user.last_name,
+            'prenom': user.first_name,
+            'role': getattr(getattr(user, 'id_role', None), 'code', None),
+            'departement': getattr(getattr(user, 'id_departement', None), 'nom', None),
         }

@@ -91,10 +91,9 @@ class DemandeSerializer(BaseDepthSerializer):
         model = Demande
 
 
-class LigneBCSerializer(serializers.ModelSerializer):
-    class Meta:
+class LigneBCSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = LigneBC
-        fields = '__all__'
 
 
 class BonCommandeSerializer(BaseDepthSerializer):
@@ -106,25 +105,21 @@ class BonCommandeSerializer(BaseDepthSerializer):
         read_only_fields = ('numero_bc',)
 
 
-class SignatureBCSerializer(serializers.ModelSerializer):
-    class Meta:
+class SignatureBCSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = SignatureBC
-        fields = '__all__'
 
 
-class FactureSerializer(serializers.ModelSerializer):
-    class Meta:
+class FactureSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = Facture
-        fields = '__all__'
 
 
-class PaiementSerializer(serializers.ModelSerializer):
-    class Meta:
+class PaiementSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = Paiement
-        fields = '__all__'
 
 
-class TransfertSerializer(serializers.ModelSerializer):
-    class Meta:
+class TransfertSerializer(BaseDepthSerializer):
+    class Meta(BaseDepthSerializer.Meta):
         model = Transfert
-        fields = '__all__'
