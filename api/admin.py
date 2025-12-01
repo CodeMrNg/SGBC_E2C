@@ -143,8 +143,8 @@ class UtilisateurAdmin(UserAdmin):
 
 @admin.register(Departement)
 class DepartementAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'description', 'actif')
-    search_fields = ('nom',)
+    list_display = ('nom', 'code', 'slug', 'description', 'actif')
+    search_fields = ('nom', 'code', 'slug', 'description')
     list_filter = ('actif',)
 
 

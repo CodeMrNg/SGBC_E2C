@@ -503,7 +503,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/departements/?actif=true&nom=IT&search=info",
+              "raw": "{{base_url}}/departements/?actif=true&code=DEP-001&slug=it-dep&search=info",
               "host": [
                 "{{base_url}}"
               ],
@@ -519,13 +519,23 @@
                 },
                 {
                   "key": "nom",
-                  "value": "IT",
+                  "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "code",
+                  "value": "DEP-001",
+                  "disabled": false
+                },
+                {
+                  "key": "slug",
+                  "value": "it-dep",
+                  "disabled": false
                 },
                 {
                   "key": "search",
                   "value": "info",
-                  "disabled": true
+                  "disabled": false
                 }
               ]
             }
@@ -548,7 +558,7 @@
             "url": "{{base_url}}/departements/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nom\": \"IT\",\n  \"description\": \"Informatique\",\n  \"actif\": true\n}"
+              "raw": "{\n  \"nom\": \"Informatique\",\n  \"description\": \"Dept IT\",\n  \"actif\": true\n}"
             }
           }
         },

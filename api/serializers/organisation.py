@@ -6,4 +6,5 @@ from ..models import Departement
 class DepartementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Departement
-        fields = ['id', 'nom', 'description', 'actif']
+        fields = ['id', 'nom', 'description', 'actif', 'code', 'slug']
+        read_only_fields = ('code', 'slug')

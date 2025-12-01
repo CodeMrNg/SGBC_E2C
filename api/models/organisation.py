@@ -1,8 +1,10 @@
+import re
 import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.utils.text import slugify
 
 from .base import BaseModel
 from .security import TwoFactorMethod
@@ -13,9 +15,44 @@ class Departement(models.Model):
     nom = models.CharField(max_length=150)
     description = models.TextField(blank=True)
     actif = models.BooleanField(default=True)
+    code = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=160, unique=True)
 
     def __str__(self) -> str:
-        return self.nom
+        return f'{self.nom} ({self.code})'
+
+    @classmethod
+    def _next_seq_for_code(cls, base: str) -> int:
+        existing = cls.objects.filter(code__startswith=base).values_list('code', flat=True)
+        max_seq = 0
+        for code in existing:
+            m = re.match(rf'^{re.escape(base)}-(\d+)$', code or '')
+            if m:
+                max_seq = max(max_seq, int(m.group(1)))
+        return max_seq + 1
+
+    @classmethod
+    def generate_code(cls, nom: str) -> str:
+        base = slugify(nom).upper().replace('-', '') or 'DEPT'
+        seq = cls._next_seq_for_code(base)
+        return f'{base}-{seq:03d}'
+
+    @classmethod
+    def generate_slug(cls, nom: str, current_id=None) -> str:
+        base = slugify(nom) or 'departement'
+        slug_candidate = base
+        idx = 1
+        while cls.objects.exclude(id=current_id).filter(slug=slug_candidate).exists():
+            idx += 1
+            slug_candidate = f'{base}-{idx}'
+        return slug_candidate
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self.generate_code(self.nom)
+        if not self.slug:
+            self.slug = self.generate_slug(self.nom, current_id=self.id)
+        super().save(*args, **kwargs)
 
 
 class Role(models.Model):

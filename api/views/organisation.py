@@ -15,6 +15,8 @@ class DepartementListCreateView(generics.ListCreateAPIView):
         actif = self.request.GET.get('actif')
         search = self.request.GET.get('search')
         nom = self.request.GET.get('nom')
+        code = self.request.GET.get('code')
+        slug = self.request.GET.get('slug')
 
         if actif is not None:
             if actif.lower() in ['true', '1', 'yes']:
@@ -25,8 +27,16 @@ class DepartementListCreateView(generics.ListCreateAPIView):
         if nom:
             qs = qs.filter(nom__icontains=nom)
 
+        if code:
+            qs = qs.filter(code__icontains=code)
+
+        if slug:
+            qs = qs.filter(slug__icontains=slug)
+
         if search:
-            qs = qs.filter(Q(nom__icontains=search) | Q(description__icontains=search))
+            qs = qs.filter(
+                Q(nom__icontains=search) | Q(description__icontains=search) | Q(code__icontains=search) | Q(slug__icontains=search)
+            )
 
         return qs.order_by('nom')
 
