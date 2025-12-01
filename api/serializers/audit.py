@@ -17,7 +17,22 @@ from ..models import (
     SignatureNumerique,
     Transfert,
 )
-from .resources import BonCommandeSerializer, DemandeSerializer, TransfertSerializer
+from .resources import (
+    ArticleSerializer,
+    BonCommandeSerializer,
+    DemandeSerializer,
+    DocumentSerializer,
+    FactureSerializer,
+    FournisseurSerializer,
+    LigneBCSerializer,
+    LigneDemandeSerializer,
+    MethodePaiementSerializer,
+    PaiementSerializer,
+    SignatureBCSerializer,
+    SignatureNumeriqueSerializer,
+    TransfertSerializer,
+)
+from .organisation import DepartementSerializer
 
 
 class AuditLogSerializer(serializers.ModelSerializer):
@@ -81,41 +96,30 @@ class AuditLogSerializer(serializers.ModelSerializer):
         if not obj.id_objet:
             return None
 
-        # Cas spécifiques avec sérialisation enrichie
-        if type_upper == 'TRANSFERT':
-            instance = Transfert.objects.filter(pk=obj.id_objet).first()
-            return TransfertSerializer(instance).data if instance else None
-        if type_upper == 'DEMANDE':
-            instance = Demande.objects.filter(pk=obj.id_objet).first()
-            return DemandeSerializer(instance).data if instance else None
-        if type_upper == 'BON_COMMANDE':
-            instance = BonCommande.objects.filter(pk=obj.id_objet).first()
-            return BonCommandeSerializer(instance).data if instance else None
-
-        # Autres objets : retour minimal id/label
-        mapping = {
-            'ARTICLE': Article,
-            'DOCUMENT': Document,
-            'FACTURE': Facture,
-            'PAIEMENT': Paiement,
-            'FOURNISSEUR': Fournisseur,
-            'LIGNE_DEMANDE': LigneDemande,
-            'LIGNE_BC': LigneBC,
-            'SIGNATURE_BC': SignatureBC,
-            'SIGNATURE_NUMERIQUE': SignatureNumerique,
-            'DEPARTEMENT': Departement,
-            'METHODE_PAIEMENT': MethodePaiement,
+        serializer_mapping = {
+            'TRANSFERT': (Transfert, TransfertSerializer),
+            'DEMANDE': (Demande, DemandeSerializer),
+            'BON_COMMANDE': (BonCommande, BonCommandeSerializer),
+            'ARTICLE': (Article, ArticleSerializer),
+            'DOCUMENT': (Document, DocumentSerializer),
+            'FACTURE': (Facture, FactureSerializer),
+            'PAIEMENT': (Paiement, PaiementSerializer),
+            'FOURNISSEUR': (Fournisseur, FournisseurSerializer),
+            'LIGNE_DEMANDE': (LigneDemande, LigneDemandeSerializer),
+            'LIGNE_BC': (LigneBC, LigneBCSerializer),
+            'SIGNATURE_BC': (SignatureBC, SignatureBCSerializer),
+            'SIGNATURE_NUMERIQUE': (SignatureNumerique, SignatureNumeriqueSerializer),
+            'DEPARTEMENT': (Departement, DepartementSerializer),
+            'METHODE_PAIEMENT': (MethodePaiement, MethodePaiementSerializer),
         }
-        model = mapping.get(type_upper)
-        if not model:
+        model_serializer = serializer_mapping.get(type_upper)
+        if not model_serializer:
             return None
+        model, serializer_cls = model_serializer
         instance = model.objects.filter(pk=obj.id_objet).first()
         if not instance:
             return None
-        return {
-            'id': str(instance.id),
-            'label': str(instance),
-        }
+        return serializer_cls(instance, context=self.context).data
 
     def get_utilisateur(self, obj):
         user = obj.id_utilisateur
