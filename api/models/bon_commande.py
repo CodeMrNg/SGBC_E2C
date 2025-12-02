@@ -36,6 +36,13 @@ class BonCommande(models.Model):
         on_delete=models.PROTECT,
         related_name='bons_commande',
     )
+    agent_traitant = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='bons_commande_traitees',
+        null=True,
+        blank=True,
+    )
     id_demande_valider = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

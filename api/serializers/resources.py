@@ -107,6 +107,7 @@ class DemandeSerializer(BaseDepthSerializer):
     lignes = LigneDemandeSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
     id_departement = DepartementSerializer(read_only=True)
+    agent_traitant = UserSerializer(read_only=True)
     transferts = TransfertLiteSerializer(many=True, read_only=True)
 
     class Meta(BaseDepthSerializer.Meta):
@@ -124,6 +125,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
     id_demande = DemandeSerializer(read_only=True)
     id_fournisseur = FournisseurSerializer(read_only=True)
     id_departement = DepartementSerializer(read_only=True)
+    agent_traitant = UserSerializer(read_only=True)
     id_methode_paiement = MethodePaiementSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
     id_ligne_budgetaire = LigneBudgetaireSerializer(read_only=True)

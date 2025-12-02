@@ -118,6 +118,10 @@
       "value": "16161616-1616-1616-1616-161616161616"
     },
     {
+      "key": "agent_id",
+      "value": "17171717-1717-1717-1717-171717171717"
+    },
+    {
       "key": "paiement_id",
       "value": "17171717-1717-1717-1717-171717171717"
     }
@@ -1002,6 +1006,20 @@
             ],
             "url": "{{base_url}}/devises/{{devise_id}}/"
           }
+        },
+        {
+          "name": "Devises - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/devises/stats/",
+            "description": "Chiffres total/actifs/inactifs + 5 dernières devises (inactives à traiter)"
+          }
         }
       ]
     },
@@ -1087,6 +1105,20 @@
               }
             ],
             "url": "{{base_url}}/methodes-paiement/{{methode_id}}/"
+          }
+        },
+        {
+          "name": "Methodes Paiement - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/methodes-paiement/stats/",
+            "description": "Chiffres total/actifs/inactifs + 5 dernières méthodes (inactives à traiter)"
           }
         }
       ]
@@ -1174,6 +1206,20 @@
             ],
             "url": "{{base_url}}/categories/{{categorie_id}}/"
           }
+        },
+        {
+          "name": "Categories - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/categories/stats/",
+            "description": "Chiffres total/actifs/inactifs + 5 dernières catégories (inactives à traiter)"
+          }
         }
       ]
     },
@@ -1259,6 +1305,20 @@
               }
             ],
             "url": "{{base_url}}/articles/{{article_id}}/"
+          }
+        },
+        {
+          "name": "Articles - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/articles/stats/",
+            "description": "Chiffres total/actifs/inactifs + 5 derniers articles (inactifs à traiter)"
           }
         }
       ]
@@ -1346,6 +1406,20 @@
             ],
             "url": "{{base_url}}/fournisseurs/{{fournisseur_id}}/"
           }
+        },
+        {
+          "name": "Fournisseurs - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs/stats/",
+            "description": "Chiffres total/actifs/inactifs + 5 derniers fournisseurs (inactifs à traiter)"
+          }
         }
       ]
     },
@@ -1431,6 +1505,20 @@
               }
             ],
             "url": "{{base_url}}/banques/{{banque_id}}/"
+          }
+        },
+        {
+          "name": "Banques - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/banques/stats/",
+            "description": "Chiffres total/actifs/inactifs + 5 dernières banques (inactives à traiter)"
           }
         }
       ]
@@ -1518,6 +1606,20 @@
             ],
             "url": "{{base_url}}/fournisseurs-rib/{{rib_id}}/"
           }
+        },
+        {
+          "name": "Fournisseurs RIB - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/fournisseurs-rib/stats/",
+            "description": "Chiffres total/actifs/inactifs + 5 derniers RIB (inactifs à traiter)"
+          }
         }
       ]
     },
@@ -1559,6 +1661,18 @@
                   "key": "departement_id",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "date_debut",
+                  "value": "2025-01-01",
+                  "disabled": true,
+                  "description": "Filtre par date de creation >= (alias date_from)"
+                },
+                {
+                  "key": "date_fin",
+                  "value": "2025-01-31",
+                  "disabled": true,
+                  "description": "Filtre par date de creation <= (alias date_to)"
                 },
                 {
                   "key": "search",
@@ -1657,6 +1771,42 @@
               "raw": "{\n  \"departement_id\": \"{{departement_id}}\",\n  \"raison\": \"Justification du transfert\"\n}"
             }
           }
+        },
+        {
+          "name": "Demandes - Assigner agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/demandes/{{demande_id}}/assign-agent/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agent_id\": \"{{agent_id}}\"\n}"
+            },
+            "description": "Envoyer agent_id pour affecter, ou null/\"\" pour retirer l'agent traitant"
+          }
+        },
+        {
+          "name": "Demandes - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/demandes/stats/",
+            "description": "Chiffres totaux par statut + 5 dernières + 5 à traiter"
+          }
         }
       ]
     },
@@ -1742,6 +1892,20 @@
               }
             ],
             "url": "{{base_url}}/lignes-demande/{{ligne_demande_id}}/"
+          }
+        },
+        {
+          "name": "Lignes Demande - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-demande/stats/",
+            "description": "Total + 5 dernières lignes (pas de statut à traiter)"
           }
         }
       ]
@@ -1829,6 +1993,20 @@
             ],
             "url": "{{base_url}}/lignes-budget/{{ligne_budget_id}}/"
           }
+        },
+        {
+          "name": "Lignes Budget - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-budget/stats/",
+            "description": "Total + 5 dernières lignes budgetaires (pas de statut à traiter)"
+          }
         }
       ]
     },
@@ -1914,6 +2092,20 @@
               }
             ],
             "url": "{{base_url}}/documents/{{document_id}}/"
+          }
+        },
+        {
+          "name": "Documents - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/documents/stats/",
+            "description": "Total + actif/archive + 5 derniers documents"
           }
         }
       ]
@@ -2001,6 +2193,20 @@
             ],
             "url": "{{base_url}}/signatures/{{signature_id}}/"
           }
+        },
+        {
+          "name": "Signatures - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/signatures/stats/",
+            "description": "Total + 5 dernières signatures numériques"
+          }
         }
       ]
     },
@@ -2047,6 +2253,18 @@
                   "key": "departement_id",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "date_debut",
+                  "value": "2025-01-01",
+                  "disabled": true,
+                  "description": "Filtre par date de creation >= (alias date_from)"
+                },
+                {
+                  "key": "date_fin",
+                  "value": "2025-01-31",
+                  "disabled": true,
+                  "description": "Filtre par date de creation <= (alias date_to)"
                 }
               ]
             }
@@ -2140,6 +2358,42 @@
               "raw": "{\n  \"departement_id\": \"{{departement_id}}\",\n  \"raison\": \"Justification du transfert\"\n}"
             }
           }
+        },
+        {
+          "name": "Bons Commande - Assigner agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/bons-commande/{{bc_id}}/assign-agent/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agent_id\": \"{{agent_id}}\"\n}"
+            },
+            "description": "Envoyer agent_id pour affecter, ou null/\"\" pour retirer l'agent traitant"
+          }
+        },
+        {
+          "name": "Bons Commande - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/bons-commande/stats/",
+            "description": "Chiffres totaux par statut + 5 dernières + 5 à traiter"
+          }
         }
       ]
     },
@@ -2225,6 +2479,20 @@
               }
             ],
             "url": "{{base_url}}/lignes-bc/{{ligne_bc_id}}/"
+          }
+        },
+        {
+          "name": "Lignes BC - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/lignes-bc/stats/",
+            "description": "Total + 5 dernières lignes BC"
           }
         }
       ]
@@ -2312,6 +2580,20 @@
             ],
             "url": "{{base_url}}/signatures-bc/{{signature_bc_id}}/"
           }
+        },
+        {
+          "name": "Signatures BC - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/signatures-bc/stats/",
+            "description": "Total + en_attente/approuve/refuse + 5 dernières signatures BC (en attente à traiter)"
+          }
         }
       ]
     },
@@ -2398,6 +2680,20 @@
             ],
             "url": "{{base_url}}/factures/{{facture_id}}/"
           }
+        },
+        {
+          "name": "Factures - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/factures/stats/",
+            "description": "Total + comptage par statut facture + 5 dernières (recue/attente/validee à traiter)"
+          }
         }
       ]
     },
@@ -2483,6 +2779,20 @@
               }
             ],
             "url": "{{base_url}}/paiements/{{paiement_id}}/"
+          }
+        },
+        {
+          "name": "Paiements - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/paiements/stats/",
+            "description": "Total + comptage par statut paiement + 5 derniers (en_attente/en_cours à traiter)"
           }
         }
       ]
@@ -2592,6 +2902,20 @@
                 ""
               ]
             }
+          }
+        },
+        {
+          "name": "Transferts - Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access}}"
+              }
+            ],
+            "url": "{{base_url}}/transferts/stats/",
+            "description": "Total + valide/rejete + 5 derniers transferts"
           }
         }
       ]

@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.db import models
 
 
@@ -29,6 +30,13 @@ class Demande(models.Model):
         'Departement',
         on_delete=models.PROTECT,
         related_name='demandes',
+    )
+    agent_traitant = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='demandes_traitees',
+        null=True,
+        blank=True,
     )
     documents = models.ManyToManyField(
         'Document',

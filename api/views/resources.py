@@ -1,6 +1,7 @@
 from django.db import models, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.views import APIView
@@ -27,9 +28,12 @@ from ..models import (
     SignatureBC,
     SignatureNumerique,
     Transfert,
+    Utilisateur,
 )
-from ..models.bon_commande import StatutBC
+from ..models.bon_commande import DecisionSignature, StatutBC
 from ..models.demandes import StatutDemande
+from ..models.documents import StatutArchivage
+from ..models.facturation_paiement import StatutFacture, StatutPaiement
 from ..models.transferts import StatutTransfert
 from ..serializers.resources import (
     ArticleSerializer,
@@ -73,6 +77,19 @@ class DeviseViewSet(AuditModelViewSet):
                 qs = qs.filter(actif=False)
         return qs
 
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('actif').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'actifs': counts.get(True, 0),
+            'inactifs': counts.get(False, 0),
+            'derniers': self.get_serializer(qs.order_by('-id')[:5], many=True).data,
+            'a_traiter': self.get_serializer(qs.filter(actif=False).order_by('-id')[:5], many=True).data,
+        }
+        return Response({'message': 'Statistiques des devises', 'data': data}, status=status.HTTP_200_OK)
+
 
 class MethodePaiementViewSet(AuditModelViewSet):
     queryset = MethodePaiement.objects.all().order_by('code')
@@ -89,6 +106,19 @@ class MethodePaiementViewSet(AuditModelViewSet):
         if search:
             qs = qs.filter(Q(code__icontains=search) | Q(libelle__icontains=search) | Q(description__icontains=search))
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('actif').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'actifs': counts.get(True, 0),
+            'inactifs': counts.get(False, 0),
+            'derniers': self.get_serializer(qs.order_by('-id')[:5], many=True).data,
+            'a_traiter': self.get_serializer(qs.filter(actif=False).order_by('-id')[:5], many=True).data,
+        }
+        return Response({'message': 'Statistiques des méthodes de paiement', 'data': data}, status=status.HTTP_200_OK)
 
 
 class CategorieViewSet(AuditModelViewSet):
@@ -109,6 +139,19 @@ class CategorieViewSet(AuditModelViewSet):
         if actif is not None:
             qs = qs.filter(actif=actif.lower() in ['true', '1', 'yes'])
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('actif').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'actifs': counts.get(True, 0),
+            'inactifs': counts.get(False, 0),
+            'derniers': self.get_serializer(qs.order_by('-id')[:5], many=True).data,
+            'a_traiter': self.get_serializer(qs.filter(actif=False).order_by('-id')[:5], many=True).data,
+        }
+        return Response({'message': 'Statistiques des catégories', 'data': data}, status=status.HTTP_200_OK)
 
 
 class ArticleViewSet(AuditModelViewSet):
@@ -132,6 +175,19 @@ class ArticleViewSet(AuditModelViewSet):
         if actif is not None:
             qs = qs.filter(actif=actif.lower() in ['true', '1', 'yes'])
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('actif').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'actifs': counts.get(True, 0),
+            'inactifs': counts.get(False, 0),
+            'derniers': self.get_serializer(qs.order_by('-id')[:5], many=True).data,
+            'a_traiter': self.get_serializer(qs.filter(actif=False).order_by('-id')[:5], many=True).data,
+        }
+        return Response({'message': 'Statistiques des articles', 'data': data}, status=status.HTTP_200_OK)
 
 
 class FournisseurViewSet(AuditModelViewSet):
@@ -157,6 +213,19 @@ class FournisseurViewSet(AuditModelViewSet):
             qs = qs.filter(actif=actif.lower() in ['true', '1', 'yes'])
         return qs
 
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('actif').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'actifs': counts.get(True, 0),
+            'inactifs': counts.get(False, 0),
+            'derniers': self.get_serializer(qs.order_by('-id')[:5], many=True).data,
+            'a_traiter': self.get_serializer(qs.filter(actif=False).order_by('-id')[:5], many=True).data,
+        }
+        return Response({'message': 'Statistiques des fournisseurs', 'data': data}, status=status.HTTP_200_OK)
+
 
 class BanqueViewSet(AuditModelViewSet):
     queryset = Banque.objects.all().order_by('code_banque')
@@ -176,6 +245,19 @@ class BanqueViewSet(AuditModelViewSet):
         if actif is not None:
             qs = qs.filter(actif=actif.lower() in ['true', '1', 'yes'])
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('actif').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'actifs': counts.get(True, 0),
+            'inactifs': counts.get(False, 0),
+            'derniers': self.get_serializer(qs.order_by('-id')[:5], many=True).data,
+            'a_traiter': self.get_serializer(qs.filter(actif=False).order_by('-id')[:5], many=True).data,
+        }
+        return Response({'message': 'Statistiques des banques', 'data': data}, status=status.HTTP_200_OK)
 
 
 class FournisseurRIBViewSet(AuditModelViewSet):
@@ -197,9 +279,22 @@ class FournisseurRIBViewSet(AuditModelViewSet):
             qs = qs.filter(actif=actif.lower() in ['true', '1', 'yes'])
         return qs
 
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('actif').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'actifs': counts.get(True, 0),
+            'inactifs': counts.get(False, 0),
+            'derniers': self.get_serializer(qs.order_by('-date_creation')[:5], many=True).data,
+            'a_traiter': self.get_serializer(qs.filter(actif=False).order_by('-date_creation')[:5], many=True).data,
+        }
+        return Response({'message': 'Statistiques des RIB fournisseurs', 'data': data}, status=status.HTTP_200_OK)
+
 
 class DemandeViewSet(AuditModelViewSet):
-    queryset = Demande.objects.select_related('id_departement').prefetch_related(
+    queryset = Demande.objects.select_related('id_departement', 'agent_traitant').prefetch_related(
         'lignes__id_article',
         'lignes__id_fournisseur',
         'documents',
@@ -222,6 +317,8 @@ class DemandeViewSet(AuditModelViewSet):
         statut = self.request.GET.get('statut')
         departement = self.request.GET.get('departement_id')
         search = self.request.GET.get('search')
+        date_debut = self.request.GET.get('date_debut') or self.request.GET.get('date_from')
+        date_fin = self.request.GET.get('date_fin') or self.request.GET.get('date_to')
         if numero:
             qs = qs.filter(numero_demande__icontains=numero)
         if statut:
@@ -233,9 +330,74 @@ class DemandeViewSet(AuditModelViewSet):
             qs = qs.filter(statut_demande=statut_normalise)
         if departement:
             qs = qs.filter(id_departement_id=departement)
+        if date_debut:
+            parsed = parse_date(date_debut)
+            if parsed:
+                qs = qs.filter(date_creation__date__gte=parsed)
+        if date_fin:
+            parsed = parse_date(date_fin)
+            if parsed:
+                qs = qs.filter(date_creation__date__lte=parsed)
         if search:
             qs = qs.filter(Q(numero_demande__icontains=search) | Q(objet__icontains=search))
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('statut_demande').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'en_attente': counts.get(StatutDemande.EN_ATTENTE, 0),
+            'en_traitement': counts.get(StatutDemande.EN_TRAITEMENT, 0),
+            'valider': counts.get(StatutDemande.VALIDER, 0),
+            'rejeter': counts.get(StatutDemande.REJETER, 0),
+            'dernieres': self.get_serializer(qs.order_by('-date_creation')[:5], many=True).data,
+            'a_traiter': self.get_serializer(
+                qs.filter(statut_demande__in=[StatutDemande.EN_ATTENTE, StatutDemande.EN_TRAITEMENT])
+                .order_by('-date_creation')[:5],
+                many=True,
+            ).data,
+        }
+        return Response({'message': 'Statistiques des demandes', 'data': data}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='assign-agent')
+    def assign_agent(self, request, pk=None):
+        agent_id = request.data.get('agent_id') or request.data.get('agent_traitant_id')
+        demande = self.get_object()
+        if agent_id in [None, '', 'null']:
+            demande.agent_traitant = None
+            demande.save(update_fields=['agent_traitant'])
+            log_audit(
+                request.user,
+                'demande_assign_agent',
+                type_objet=self.audit_type,
+                id_objet=demande.id,
+                request=request,
+                details='Agent traitant retiré',
+            )
+            serializer = self.get_serializer(demande)
+            return Response(
+                {'message': 'Agent traitant retiré avec succès', 'data': serializer.data},
+                status=status.HTTP_200_OK,
+            )
+
+        agent = get_object_or_404(Utilisateur, pk=agent_id)
+        demande.agent_traitant = agent
+        demande.save(update_fields=['agent_traitant'])
+        log_audit(
+            request.user,
+            'demande_assign_agent',
+            type_objet=self.audit_type,
+            id_objet=demande.id,
+            request=request,
+            details=f'Agent traitant défini: {agent.id}',
+        )
+        serializer = self.get_serializer(demande)
+        return Response(
+            {'message': 'Agent traitant mis à jour avec succès', 'data': serializer.data},
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=True, methods=['post'], url_path='transfer')
     def transfer(self, request, pk=None):
@@ -308,6 +470,16 @@ class LigneDemandeViewSet(AuditModelViewSet):
             qs = qs.filter(id_fournisseur_id=fournisseur)
         return qs
 
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        data = {
+            'total': qs.count(),
+            'derniers': self.get_serializer(qs.order_by('-id')[:5], many=True).data,
+            'a_traiter': [],
+        }
+        return Response({'message': 'Statistiques des lignes de demande', 'data': data}, status=status.HTTP_200_OK)
+
 
 class LigneBudgetaireViewSet(AuditModelViewSet):
     queryset = LigneBudgetaire.objects.select_related('id_departement', 'id_devise').all()
@@ -327,6 +499,16 @@ class LigneBudgetaireViewSet(AuditModelViewSet):
         if exercice:
             qs = qs.filter(exercice=exercice)
         return qs.order_by('code_ligne')
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        data = {
+            'total': qs.count(),
+            'derniers': self.get_serializer(qs.order_by('-exercice', '-code_ligne')[:5], many=True).data,
+            'a_traiter': [],
+        }
+        return Response({'message': 'Statistiques des lignes budgétaires', 'data': data}, status=status.HTTP_200_OK)
 
 
 class DocumentViewSet(AuditModelViewSet):
@@ -351,6 +533,19 @@ class DocumentViewSet(AuditModelViewSet):
             qs = qs.filter(statut_archivage=statut)
         return qs
 
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('statut_archivage').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'actif': counts.get(StatutArchivage.ACTIF, 0),
+            'archive': counts.get(StatutArchivage.ARCHIVE, 0),
+            'derniers': self.get_serializer(qs.order_by('-date_generation')[:5], many=True).data,
+            'a_traiter': [],
+        }
+        return Response({'message': 'Statistiques des documents', 'data': data}, status=status.HTTP_200_OK)
+
 
 class SignatureNumeriqueViewSet(AuditModelViewSet):
     queryset = SignatureNumerique.objects.select_related('id_document', 'id_utilisateur').all()
@@ -367,6 +562,16 @@ class SignatureNumeriqueViewSet(AuditModelViewSet):
         if user:
             qs = qs.filter(id_utilisateur_id=user)
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        data = {
+            'total': qs.count(),
+            'derniers': self.get_serializer(qs.order_by('-date_signature')[:5], many=True).data,
+            'a_traiter': [],
+        }
+        return Response({'message': 'Statistiques des signatures numériques', 'data': data}, status=status.HTTP_200_OK)
 
 
 class TransfertViewSet(AuditModelViewSet):
@@ -403,12 +608,26 @@ class TransfertViewSet(AuditModelViewSet):
             qs = qs.filter(statut=statut)
         return qs
 
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('statut').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'valide': counts.get(StatutTransfert.VALIDE, 0),
+            'rejete': counts.get(StatutTransfert.REJETE, 0),
+            'derniers': self.get_serializer(qs.order_by('-date_transfert')[:5], many=True).data,
+            'a_traiter': [],
+        }
+        return Response({'message': 'Statistiques des transferts', 'data': data}, status=status.HTTP_200_OK)
+
 
 class BonCommandeViewSet(AuditModelViewSet):
     queryset = BonCommande.objects.select_related(
         'id_demande',
         'id_fournisseur',
         'id_departement',
+        'agent_traitant',
         'id_methode_paiement',
         'id_devise',
         'id_ligne_budgetaire',
@@ -437,6 +656,8 @@ class BonCommandeViewSet(AuditModelViewSet):
         statut = self.request.GET.get('statut')
         fournisseur = self.request.GET.get('fournisseur_id')
         departement = self.request.GET.get('departement_id')
+        date_debut = self.request.GET.get('date_debut') or self.request.GET.get('date_from')
+        date_fin = self.request.GET.get('date_fin') or self.request.GET.get('date_to')
         if numero:
             qs = qs.filter(numero_bc__icontains=numero)
         if statut:
@@ -452,7 +673,71 @@ class BonCommandeViewSet(AuditModelViewSet):
             qs = qs.filter(id_fournisseur_id=fournisseur)
         if departement:
             qs = qs.filter(id_departement_id=departement)
+        if date_debut:
+            parsed = parse_date(date_debut)
+            if parsed:
+                qs = qs.filter(date_creation__date__gte=parsed)
+        if date_fin:
+            parsed = parse_date(date_fin)
+            if parsed:
+                qs = qs.filter(date_creation__date__lte=parsed)
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('statut_bc').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'en_attente': counts.get(StatutBC.EN_ATTENTE, 0),
+            'en_traitement': counts.get(StatutBC.EN_TRAITEMENT, 0),
+            'valider': counts.get(StatutBC.VALIDER, 0),
+            'rejeter': counts.get('rejeter', 0),  # statut non défini pour BC, valeur par défaut 0
+            'dernieres': self.get_serializer(qs.order_by('-date_creation')[:5], many=True).data,
+            'a_traiter': self.get_serializer(
+                qs.filter(statut_bc__in=[StatutBC.EN_ATTENTE, StatutBC.EN_TRAITEMENT]).order_by('-date_creation')[:5],
+                many=True,
+            ).data,
+        }
+        return Response({'message': 'Statistiques des bons de commande', 'data': data}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='assign-agent')
+    def assign_agent(self, request, pk=None):
+        agent_id = request.data.get('agent_id') or request.data.get('agent_traitant_id')
+        bc = self.get_object()
+        if agent_id in [None, '', 'null']:
+            bc.agent_traitant = None
+            bc.save(update_fields=['agent_traitant'])
+            log_audit(
+                request.user,
+                'bon_commande_assign_agent',
+                type_objet=self.audit_type,
+                id_objet=bc.id,
+                request=request,
+                details='Agent traitant retiré',
+            )
+            serializer = self.get_serializer(bc)
+            return Response(
+                {'message': 'Agent traitant retiré avec succès', 'data': serializer.data},
+                status=status.HTTP_200_OK,
+            )
+
+        agent = get_object_or_404(Utilisateur, pk=agent_id)
+        bc.agent_traitant = agent
+        bc.save(update_fields=['agent_traitant'])
+        log_audit(
+            request.user,
+            'bon_commande_assign_agent',
+            type_objet=self.audit_type,
+            id_objet=bc.id,
+            request=request,
+            details=f'Agent traitant défini: {agent.id}',
+        )
+        serializer = self.get_serializer(bc)
+        return Response(
+            {'message': 'Agent traitant mis à jour avec succès', 'data': serializer.data},
+            status=status.HTTP_200_OK,
+        )
 
 
 class DashboardView(APIView):
@@ -619,6 +904,16 @@ class LigneBCViewSet(AuditModelViewSet):
             qs = qs.filter(id_article_id=article)
         return qs
 
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        data = {
+            'total': qs.count(),
+            'derniers': self.get_serializer(qs.order_by('-id')[:5], many=True).data,
+            'a_traiter': [],
+        }
+        return Response({'message': 'Statistiques des lignes BC', 'data': data}, status=status.HTTP_200_OK)
+
 
 class SignatureBCViewSet(AuditModelViewSet):
     queryset = SignatureBC.objects.select_related('id_bc', 'id_signataire', 'id_document_preuve').all()
@@ -635,6 +930,20 @@ class SignatureBCViewSet(AuditModelViewSet):
         if signataire:
             qs = qs.filter(id_signataire_id=signataire)
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('decision').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'en_attente': counts.get(DecisionSignature.EN_ATTENTE, 0),
+            'approuve': counts.get(DecisionSignature.APPROUVE, 0),
+            'refuse': counts.get(DecisionSignature.REFUSE, 0),
+            'derniers': self.get_serializer(qs.order_by('-date_signature')[:5], many=True).data,
+            'a_traiter': self.get_serializer(qs.filter(decision=DecisionSignature.EN_ATTENTE).order_by('-date_signature')[:5], many=True).data,
+        }
+        return Response({'message': 'Statistiques des signatures BC', 'data': data}, status=status.HTTP_200_OK)
 
 
 class FactureViewSet(AuditModelViewSet):
@@ -655,6 +964,26 @@ class FactureViewSet(AuditModelViewSet):
         if statut:
             qs = qs.filter(statut_facture=statut)
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('statut_facture').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'recue': counts.get(StatutFacture.RECUE, 0),
+            'validee': counts.get(StatutFacture.VALIDEE, 0),
+            'attente_paiement': counts.get(StatutFacture.ATTENTE_PAIEMENT, 0),
+            'payee': counts.get(StatutFacture.PAYEE, 0),
+            'rejete': counts.get(StatutFacture.REJETEE, 0),
+            'derniers': self.get_serializer(qs.order_by('-date_facture')[:5], many=True).data,
+            'a_traiter': self.get_serializer(
+                qs.filter(statut_facture__in=[StatutFacture.RECUE, StatutFacture.ATTENTE_PAIEMENT, StatutFacture.VALIDEE])
+                .order_by('-date_facture')[:5],
+                many=True,
+            ).data,
+        }
+        return Response({'message': 'Statistiques des factures', 'data': data}, status=status.HTTP_200_OK)
 
 
 class PaiementViewSet(AuditModelViewSet):
@@ -677,3 +1006,22 @@ class PaiementViewSet(AuditModelViewSet):
         if statut:
             qs = qs.filter(statut_paiement=statut)
         return qs
+
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, request):
+        qs = self.filter_queryset(self.get_queryset())
+        counts = dict(qs.values_list('statut_paiement').annotate(total=models.Count('id')))
+        data = {
+            'total': qs.count(),
+            'en_attente': counts.get(StatutPaiement.EN_ATTENTE, 0),
+            'en_cours': counts.get(StatutPaiement.EN_COURS, 0),
+            'execute': counts.get(StatutPaiement.EXECUTE, 0),
+            'rejete': counts.get(StatutPaiement.REJETE, 0),
+            'derniers': self.get_serializer(qs.order_by('-date_ordre', '-date_execution')[:5], many=True).data,
+            'a_traiter': self.get_serializer(
+                qs.filter(statut_paiement__in=[StatutPaiement.EN_ATTENTE, StatutPaiement.EN_COURS])
+                .order_by('-date_ordre', '-date_execution')[:5],
+                many=True,
+            ).data,
+        }
+        return Response({'message': 'Statistiques des paiements', 'data': data}, status=status.HTTP_200_OK)
