@@ -1,0 +1,181 @@
+[{
+        "id": "22ab286c-ed84-431e-a9d9-e7e4bc5124fd",
+        "code": "ACH",
+        "libelle": "Acheteur",
+        "description": ""
+    },
+    {
+        "id": "1eb22195-ed1c-4de9-b92a-834942c18be5",
+        "code": "ADMIN",
+        "libelle": "Administrateur",
+        "description": ""
+    },
+    {
+        "id": "afbe6312-319a-4791-a865-cbabe2c37f85",
+        "code": "AGENT",
+        "libelle": "Agent Administratif",
+        "description": "Assure les tâches administratives quotidiennes et le traitement des dossiers."
+    },
+    {
+        "id": "c84e8a23-f88b-4858-9aa9-6d0e06ea6de7",
+        "code": "AGENT_SAISIE",
+        "libelle": "Agent de Saisie",
+        "description": "S'occupe de la saisie, du classement et de la mise à jour des données."
+    },
+    {
+        "id": "08499b27-328a-443b-a74f-f52f35a69aa8",
+        "code": "CHEF_DEP",
+        "libelle": "Chef de Département",
+        "description": "Encadre un département et veille à la bonne exécution des missions."
+    },
+    {
+        "id": "ebdad5dc-d76a-4522-a334-b87f15aab06b",
+        "code": "CHEF_DEP_ACHATS",
+        "libelle": "Chef de Département Achats et Approvisionnements",
+        "description": "Dirige les achats, la relation fournisseurs et les approvisionnements."
+    },
+    {
+        "id": "00c868ba-8f2f-4805-93d5-2f4a1ca5a404",
+        "code": "CHEF_DEP_LOGISTIQUE",
+        "libelle": "Chef de Département Logistique et Moyens Généraux",
+        "description": "Assure la logistique, la maintenance et les moyens généraux de l’organisation."
+    },
+    {
+        "id": "3b7db950-85e1-426d-b200-9c4e282b83e8",
+        "code": "CHEF_DEP_PATRIMOINE",
+        "libelle": "Chef de Département Patrimoine, Filiales et Participations",
+        "description": "Gère les biens, les filiales et les participations stratégiques."
+    },
+    {
+        "id": "8a5c4a1d-84b5-4f05-a731-86cbe7b076ee",
+        "code": "CHEF_DEP_SI",
+        "libelle": "Chef de Département Systèmes d’Information",
+        "description": "Supervise l’infrastructure informatique, les systèmes et les solutions numériques."
+    },
+    {
+        "id": "81aea6a7-18dd-43fd-bb76-18f5315f052b",
+        "code": "CHEF_DP_INVEST_GESTI",
+        "libelle": "Chef de Département Programmation des Investissements et Contrôle de Gestion",
+        "description": "Planifie les investissements et assure le suivi des indicateurs de gestion."
+    },
+    {
+        "id": "b67bb09a-2cf6-4734-9ad8-7937b05d4964",
+        "code": "CHEF_SERV",
+        "libelle": "Chef de Service",
+        "description": "Supervise les équipes d’un service opérationnel et assure l’organisation du travail."
+    },
+    {
+        "id": "ece656e7-eefe-4b44-b585-dcd6249019a0",
+        "code": "COMPTA",
+        "libelle": "Comptable",
+        "description": "Assure la tenue de la comptabilité et le suivi des opérations financières."
+    },
+    {
+        "id": "d5ea5a23-7b9c-4fc9-8cec-ac02dfdc1edb",
+        "code": "DG",
+        "libelle": "Directeur Général",
+        "description": ""
+    },
+    {
+        "id": "339fa132-5991-45b1-9e2a-b7e706ea205b",
+        "code": "DGA",
+        "libelle": "Directeur Général Adjoint",
+        "description": "Assiste le Directeur Général et supervise certains domaines prioritaires."
+    },
+    {
+        "id": "d7be766b-5d7a-4243-bc98-df90cabd2467",
+        "code": "DIR",
+        "libelle": "Directeur",
+        "description": "Dirige une direction spécifique et pilote les activités de son domaine."
+    },
+    {
+        "id": "6a92630e-f62e-454a-9778-8a7890551d9a",
+        "code": "DIR_ADMIN_RH",
+        "libelle": "Directeur de l’Administration et des Ressources Humaines",
+        "description": "Encadre l’administration générale et la gestion des ressources humaines."
+    },
+    {
+        "id": "711b0801-ea51-4ab2-859a-15785a268c6a",
+        "code": "DIR_COMMERCIAL",
+        "libelle": "Directeur Commercial",
+        "description": "Définit la stratégie commerciale et pilote les équipes de vente."
+    },
+    {
+        "id": "ebccc19f-9eb6-44c6-ab80-1905e2f03080",
+        "code": "DIR_DISTRIBUTION",
+        "libelle": "Directeur de la Distribution",
+        "description": "Assure la gestion, la planification et la performance des activités de distribution."
+    },
+    {
+        "id": "f38a452e-77aa-49b6-b833-8ec174907aea",
+        "code": "DIR_EXPLOITATION",
+        "libelle": "Directeur d’Exploitation",
+        "description": "Supervise l’exploitation quotidienne, l'efficacité opérationnelle et le terrain."
+    },
+    {
+        "id": "dec8f919-8bff-462d-b6a0-6abadd85d411",
+        "code": "DIR_FIN_COMPTA",
+        "libelle": "Directeur Financier et Comptable",
+        "description": "Supervise la comptabilité, les finances, les budgets et le reporting."
+    },
+    {
+        "id": "2e0e5245-8b68-4a7a-b9af-4c47cd964b74",
+        "code": "DIR_PROD_TRANSPORT",
+        "libelle": "Directeur de la Production et du Transport",
+        "description": "Supervise la production, le transport et la gestion opérationnelle des flux."
+    },
+    {
+        "id": "0124177d-f9d6-4a1f-86de-6ae88b97b0e5",
+        "code": "DSI",
+        "libelle": "Responsable IT",
+        "description": ""
+    },
+    {
+        "id": "0d841a1b-4527-4e52-ba79-c0446aae7da7",
+        "code": "FIN",
+        "libelle": "Financier",
+        "description": ""
+    },
+    {
+        "id": "3e287dad-6fce-4f86-a6a7-7cf24eec0604",
+        "code": "FINANCE",
+        "libelle": "Responsable Financier",
+        "description": "Supervise la gestion financière, le budget et les analyses économiques."
+    },
+    {
+        "id": "24453eca-07d5-4487-bef6-0068c2a88e6c",
+        "code": "IT",
+        "libelle": "Informaticien",
+        "description": "Gère les systèmes informatiques, les infrastructures et l’assistance technique."
+    },
+    {
+        "id": "fc971dbb-8023-40c9-91e1-00349f33cb18",
+        "code": "LOGISTIQUE",
+        "libelle": "Responsable Logistique",
+        "description": "Gère les approvisionnements, les stocks et la logistique générale."
+    },
+    {
+        "id": "fdb62205-f71e-4d94-a2a4-f6c04dfda678",
+        "code": "RESP_AUDIT",
+        "libelle": "Responsable Audit",
+        "description": "Supervise les activités d’audit interne, évalue les risques, contrôle la conformité et veille à l'amélioration des procédures."
+    },
+    {
+        "id": "9aee1246-0c4a-4b0f-9564-63c184362f6b",
+        "code": "RH",
+        "libelle": "Ressources Humaines",
+        "description": "Gère le personnel, les recrutements, les dossiers et la discipline administrative."
+    },
+    {
+        "id": "32d82da4-4a91-4b65-a1f5-e80818296175",
+        "code": "SAD",
+        "libelle": "SUPER ADMIN",
+        "description": "MON SUPER ADMIN"
+    },
+    {
+        "id": "77b76c14-2343-4af7-bc74-00a2717e7ed4",
+        "code": "SECURITE",
+        "libelle": "Sécurité et Contrôle",
+        "description": "Assure la sécurité, le contrôle d’accès et la protection des installations."
+    }
+]

@@ -203,6 +203,14 @@ class DemandeViewSet(AuditModelViewSet):
         'lignes__id_article',
         'lignes__id_fournisseur',
         'documents',
+        models.Prefetch(
+            'transferts',
+            queryset=Transfert.objects.select_related(
+                'departement_source',
+                'departement_beneficiaire',
+                'agent',
+            ),
+        ),
     ).all().order_by('-date_creation')
     serializer_class = DemandeSerializer
     audit_prefix = 'demande'
@@ -410,6 +418,14 @@ class BonCommandeViewSet(AuditModelViewSet):
         'lignes__id_article',
         'lignes__id_devise',
         'documents',
+        models.Prefetch(
+            'transferts',
+            queryset=Transfert.objects.select_related(
+                'departement_source',
+                'departement_beneficiaire',
+                'agent',
+            ),
+        ),
     ).all().order_by('-date_creation')
     serializer_class = BonCommandeSerializer
     audit_prefix = 'bon_commande'

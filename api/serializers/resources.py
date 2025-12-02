@@ -85,10 +85,29 @@ class SignatureNumeriqueSerializer(BaseDepthSerializer):
         model = SignatureNumerique
 
 
+class TransfertLiteSerializer(serializers.ModelSerializer):
+    departement_source = DepartementSerializer(read_only=True)
+    departement_beneficiaire = DepartementSerializer(read_only=True)
+    agent = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Transfert
+        fields = (
+            'id',
+            'departement_source',
+            'departement_beneficiaire',
+            'statut',
+            'raison',
+            'agent',
+            'date_transfert',
+        )
+
+
 class DemandeSerializer(BaseDepthSerializer):
     lignes = LigneDemandeSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
     id_departement = DepartementSerializer(read_only=True)
+    transferts = TransfertLiteSerializer(many=True, read_only=True)
 
     class Meta(BaseDepthSerializer.Meta):
         model = Demande
@@ -108,6 +127,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
     id_methode_paiement = MethodePaiementSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
     id_ligne_budgetaire = LigneBudgetaireSerializer(read_only=True)
+    transferts = TransfertLiteSerializer(many=True, read_only=True)
 
     class Meta(BaseDepthSerializer.Meta):
         model = BonCommande
