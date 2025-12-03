@@ -20,6 +20,7 @@ from ..models import (
     SignatureBC,
     SignatureNumerique,
     Transfert,
+    TypeArticle,
     Utilisateur,
 )
 from .organisation import DepartementSerializer
@@ -50,6 +51,14 @@ class CategorieSerializer(BaseDepthSerializer):
 class ArticleSerializer(BaseDepthSerializer):
     class Meta(BaseDepthSerializer.Meta):
         model = Article
+
+    def validate(self, attrs):
+        """
+        Force un type par défaut si absent pour éviter un type_article NULL.
+        """
+        if 'type_article' not in attrs or not attrs.get('type_article'):
+            attrs['type_article'] = TypeArticle.ARTICLE
+        return attrs
 
 
 class FournisseurSerializer(BaseDepthSerializer):
