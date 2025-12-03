@@ -23,6 +23,7 @@ from api.models import (
     Role,
     SignatureBC,
     Transfert,
+    TypeArticle,
 )
 
 
@@ -195,6 +196,7 @@ class Command(BaseCommand):
             defaults={
                 "designation": "Ordinateur portable",
                 "id_categorie": categorie_map["MAT"],
+                "type_article": TypeArticle.ARTICLE,
                 "unite": "Unité",
                 "prix_reference": Decimal("350000"),
                 "id_devise": devise_map["XAF"],
@@ -206,6 +208,7 @@ class Command(BaseCommand):
             defaults={
                 "designation": "Moniteur 24 pouces",
                 "id_categorie": categorie_map["MAT"],
+                "type_article": TypeArticle.ARTICLE,
                 "unite": "Unité",
                 "prix_reference": Decimal("90000"),
                 "id_devise": devise_map["XAF"],
@@ -217,6 +220,7 @@ class Command(BaseCommand):
             defaults={
                 "designation": "Maintenance IT",
                 "id_categorie": categorie_map["SRV"],
+                "type_article": TypeArticle.SERVICE,
                 "unite": "Forfait",
                 "prix_reference": Decimal("500000"),
                 "id_devise": devise_map["XAF"],

@@ -1,7 +1,7 @@
 from .base import BaseModel
 from .organisation import Departement, Permission, Role, RolePermission, Utilisateur
 from .parametres_financiers import Devise, MethodePaiement
-from .fournisseurs import Categorie, Article, Fournisseur, Banque, FournisseurRIB
+from .fournisseurs import Categorie, Article, Fournisseur, Banque, FournisseurRIB, TypeArticle
 from .demandes import Demande, LigneDemande
 from .documents import Document, SignatureNumerique
 from .bon_commande import BonCommande, LigneBC, SignatureBC
@@ -25,6 +25,7 @@ __all__ = [
     'Fournisseur',
     'Banque',
     'FournisseurRIB',
+    'TypeArticle',
     'Demande',
     'LigneDemande',
     'Document',

@@ -166,6 +166,7 @@ class ArticleViewSet(AuditModelViewSet):
         code = self.request.GET.get('code_article')
         search = self.request.GET.get('search')
         categorie = self.request.GET.get('categorie_id')
+        type_article = self.request.GET.get('type_article')
         actif = self.request.GET.get('actif')
         if code:
             qs = qs.filter(code_article__icontains=code)
@@ -173,6 +174,8 @@ class ArticleViewSet(AuditModelViewSet):
             qs = qs.filter(Q(code_article__icontains=search) | Q(designation__icontains=search))
         if categorie:
             qs = qs.filter(id_categorie_id=categorie)
+        if type_article:
+            qs = qs.filter(type_article=type_article)
         if actif is not None:
             qs = qs.filter(actif=actif.lower() in ['true', '1', 'yes'])
         return qs

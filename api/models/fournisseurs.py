@@ -13,6 +13,11 @@ class Categorie(models.Model):
         return self.libelle
 
 
+class TypeArticle(models.TextChoices):
+    ARTICLE = ('article', 'Article')
+    SERVICE = ('service', 'Service')
+
+
 class Article(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     code_article = models.CharField(max_length=100, unique=True)
@@ -21,6 +26,13 @@ class Article(models.Model):
         'Categorie',
         on_delete=models.PROTECT,
         related_name='articles',
+        null=True,
+        blank=True,
+    )
+    type_article = models.CharField(
+        max_length=20,
+        choices=TypeArticle.choices,
+        default=TypeArticle.ARTICLE,
     )
     unite = models.CharField(max_length=50)
     prix_reference = models.DecimalField(

@@ -255,9 +255,18 @@ class CategorieAdmin(admin.ModelAdmin):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('code_article', 'designation', 'id_categorie', 'unite', 'prix_reference', 'id_devise', 'actif')
+    list_display = (
+        'code_article',
+        'designation',
+        'id_categorie',
+        'type_article',
+        'unite',
+        'prix_reference',
+        'id_devise',
+        'actif',
+    )
     search_fields = ('code_article', 'designation')
-    list_filter = ('id_categorie', 'actif')
+    list_filter = ('id_categorie', 'type_article', 'actif')
 
 
 @admin.register(Fournisseur)
