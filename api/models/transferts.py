@@ -26,7 +26,7 @@ class Transfert(models.Model):
         choices=StatutTransfert.choices,
         default=StatutTransfert.VALIDE,
     )
-    raison = models.TextField(blank=True)
+    raison = models.TextField(blank=True, null=True)
     agent = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
