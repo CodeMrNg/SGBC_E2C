@@ -49,6 +49,12 @@ class CategorieSerializer(BaseDepthSerializer):
 
 
 class ArticleSerializer(BaseDepthSerializer):
+    type_article = serializers.ChoiceField(
+        choices=TypeArticle.choices,
+        required=False,
+        default=TypeArticle.ARTICLE,
+    )
+
     class Meta(BaseDepthSerializer.Meta):
         model = Article
 
