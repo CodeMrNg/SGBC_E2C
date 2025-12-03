@@ -67,11 +67,35 @@ class FournisseurRIBSerializer(BaseDepthSerializer):
 
 
 class LigneDemandeSerializer(BaseDepthSerializer):
+    id_article = ArticleSerializer(read_only=True)
+    id_fournisseur = FournisseurSerializer(read_only=True)
+    id_devise = DeviseSerializer(read_only=True)
     id_demande_id = serializers.PrimaryKeyRelatedField(
         queryset=Demande.objects.all(),
         source='id_demande',
         write_only=True,
         required=False,
+    )
+    id_article_id = serializers.PrimaryKeyRelatedField(
+        queryset=Article.objects.all(),
+        source='id_article',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    id_fournisseur_id = serializers.PrimaryKeyRelatedField(
+        queryset=Fournisseur.objects.all(),
+        source='id_fournisseur',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    id_devise_id = serializers.PrimaryKeyRelatedField(
+        queryset=Devise.objects.all(),
+        source='id_devise',
+        write_only=True,
+        required=False,
+        allow_null=True,
     )
 
     class Meta(BaseDepthSerializer.Meta):
@@ -90,6 +114,31 @@ class LigneDemandeSerializer(BaseDepthSerializer):
                     raise serializers.ValidationError({'id_demande': 'Demande introuvable.'})
         if self.instance is None and 'id_demande' not in attrs:
             raise serializers.ValidationError({'id_demande': 'Ce champ est requis.'})
+
+        # Champs optionnels : mapper si présents
+        if 'id_article' not in attrs and 'id_article_id' not in self.initial_data:
+            article_id = self.initial_data.get('id_article')
+            if article_id:
+                try:
+                    attrs['id_article'] = Article.objects.get(pk=article_id)
+                except Article.DoesNotExist:
+                    raise serializers.ValidationError({'id_article': 'Article introuvable.'})
+
+        if 'id_fournisseur' not in attrs and 'id_fournisseur_id' not in self.initial_data:
+            fournisseur_id = self.initial_data.get('id_fournisseur')
+            if fournisseur_id:
+                try:
+                    attrs['id_fournisseur'] = Fournisseur.objects.get(pk=fournisseur_id)
+                except Fournisseur.DoesNotExist:
+                    raise serializers.ValidationError({'id_fournisseur': 'Fournisseur introuvable.'})
+
+        if 'id_devise' not in attrs and 'id_devise_id' not in self.initial_data:
+            devise_id = self.initial_data.get('id_devise')
+            if devise_id:
+                try:
+                    attrs['id_devise'] = Devise.objects.get(pk=devise_id)
+                except Devise.DoesNotExist:
+                    raise serializers.ValidationError({'id_devise': 'Devise introuvable.'})
         return attrs
 
 
@@ -161,11 +210,27 @@ class DemandeSerializer(BaseDepthSerializer):
 
 
 class LigneBCSerializer(BaseDepthSerializer):
+    id_article = ArticleSerializer(read_only=True)
+    id_devise = DeviseSerializer(read_only=True)
     id_bc_id = serializers.PrimaryKeyRelatedField(
         queryset=BonCommande.objects.all(),
         source='id_bc',
         write_only=True,
         required=False,
+    )
+    id_article_id = serializers.PrimaryKeyRelatedField(
+        queryset=Article.objects.all(),
+        source='id_article',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    id_devise_id = serializers.PrimaryKeyRelatedField(
+        queryset=Devise.objects.all(),
+        source='id_devise',
+        write_only=True,
+        required=False,
+        allow_null=True,
     )
 
     class Meta(BaseDepthSerializer.Meta):
@@ -184,6 +249,22 @@ class LigneBCSerializer(BaseDepthSerializer):
                     raise serializers.ValidationError({'id_bc': 'Bon de commande introuvable.'})
         if self.instance is None and 'id_bc' not in attrs:
             raise serializers.ValidationError({'id_bc': 'Ce champ est requis.'})
+
+        if 'id_article' not in attrs and 'id_article_id' not in self.initial_data:
+            article_id = self.initial_data.get('id_article')
+            if article_id:
+                try:
+                    attrs['id_article'] = Article.objects.get(pk=article_id)
+                except Article.DoesNotExist:
+                    raise serializers.ValidationError({'id_article': 'Article introuvable.'})
+
+        if 'id_devise' not in attrs and 'id_devise_id' not in self.initial_data:
+            devise_id = self.initial_data.get('id_devise')
+            if devise_id:
+                try:
+                    attrs['id_devise'] = Devise.objects.get(pk=devise_id)
+                except Devise.DoesNotExist:
+                    raise serializers.ValidationError({'id_devise': 'Devise introuvable.'})
         return attrs
 
 
