@@ -6,6 +6,7 @@ from ..models import (
     BonCommande,
     Categorie,
     Demande,
+    Departement,
     Devise,
     Document,
     Facture,
@@ -66,8 +67,30 @@ class FournisseurRIBSerializer(BaseDepthSerializer):
 
 
 class LigneDemandeSerializer(BaseDepthSerializer):
+    id_demande_id = serializers.PrimaryKeyRelatedField(
+        queryset=Demande.objects.all(),
+        source='id_demande',
+        write_only=True,
+        required=False,
+    )
+
     class Meta(BaseDepthSerializer.Meta):
         model = LigneDemande
+
+    def validate(self, attrs):
+        """
+        Autorise l'envoi de id_demande via id_demande_id ou id_demande (compat clients).
+        """
+        if 'id_demande' not in attrs:
+            demande_id = self.initial_data.get('id_demande')
+            if demande_id:
+                try:
+                    attrs['id_demande'] = Demande.objects.get(pk=demande_id)
+                except Demande.DoesNotExist:
+                    raise serializers.ValidationError({'id_demande': 'Demande introuvable.'})
+        if self.instance is None and 'id_demande' not in attrs:
+            raise serializers.ValidationError({'id_demande': 'Ce champ est requis.'})
+        return attrs
 
 
 class LigneBudgetaireSerializer(BaseDepthSerializer):
@@ -107,16 +130,61 @@ class DemandeSerializer(BaseDepthSerializer):
     lignes = LigneDemandeSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
     id_departement = DepartementSerializer(read_only=True)
+    id_departement_id = serializers.PrimaryKeyRelatedField(
+        queryset=Departement.objects.all(),
+        source='id_departement',
+        write_only=True,
+        required=False,
+    )
     agent_traitant = UserSerializer(read_only=True)
     transferts = TransfertLiteSerializer(many=True, read_only=True)
 
     class Meta(BaseDepthSerializer.Meta):
         model = Demande
+        read_only_fields = ('numero_demande',)
+
+    def validate(self, attrs):
+        """
+        Permet d'accepter un id_departement passé soit via id_departement_id (champ dédié)
+        soit via id_departement (compat Postman/clients existants).
+        """
+        if 'id_departement' not in attrs:
+            departement_id = self.initial_data.get('id_departement')
+            if departement_id:
+                try:
+                    attrs['id_departement'] = Departement.objects.get(pk=departement_id)
+                except Departement.DoesNotExist:
+                    raise serializers.ValidationError({'id_departement': 'Département introuvable.'})
+        if self.instance is None and 'id_departement' not in attrs:
+            raise serializers.ValidationError({'id_departement': 'Ce champ est requis.'})
+        return attrs
 
 
 class LigneBCSerializer(BaseDepthSerializer):
+    id_bc_id = serializers.PrimaryKeyRelatedField(
+        queryset=BonCommande.objects.all(),
+        source='id_bc',
+        write_only=True,
+        required=False,
+    )
+
     class Meta(BaseDepthSerializer.Meta):
         model = LigneBC
+
+    def validate(self, attrs):
+        """
+        Autorise l'envoi de id_bc via id_bc_id ou id_bc (compat clients).
+        """
+        if 'id_bc' not in attrs:
+            bc_id = self.initial_data.get('id_bc')
+            if bc_id:
+                try:
+                    attrs['id_bc'] = BonCommande.objects.get(pk=bc_id)
+                except BonCommande.DoesNotExist:
+                    raise serializers.ValidationError({'id_bc': 'Bon de commande introuvable.'})
+        if self.instance is None and 'id_bc' not in attrs:
+            raise serializers.ValidationError({'id_bc': 'Ce champ est requis.'})
+        return attrs
 
 
 class BonCommandeSerializer(BaseDepthSerializer):

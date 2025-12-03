@@ -1,4 +1,6 @@
+import re
 import uuid
+from datetime import datetime
 
 from django.conf import settings
 from django.db import models
@@ -46,6 +48,33 @@ class Demande(models.Model):
 
     def __str__(self) -> str:
         return self.numero_demande
+
+    @staticmethod
+    def _next_sequence_for_year(year: int) -> int:
+        """
+        Retourne le prochain numéro séquentiel pour l'année donnée.
+        Cherche les numéros existants au format DM/NUMXX/{year}/ pour continuer la séquence.
+        """
+        existing = Demande.objects.filter(numero_demande__endswith=f'/{year}/').values_list(
+            'numero_demande', flat=True
+        )
+        max_seq = 0
+        for numero in existing:
+            match = re.search(rf'DM/NUM(\d+)/{year}/', numero or '')
+            if match:
+                max_seq = max(max_seq, int(match.group(1)))
+        return max_seq + 1
+
+    @classmethod
+    def generate_numero_demande(cls) -> str:
+        year = datetime.now().year
+        sequence = cls._next_sequence_for_year(year)
+        return f'DM/NUM{sequence:02d}/{year}/'
+
+    def save(self, *args, **kwargs):
+        if not self.numero_demande:
+            self.numero_demande = self.generate_numero_demande()
+        super().save(*args, **kwargs)
 
 
 class LigneDemande(models.Model):

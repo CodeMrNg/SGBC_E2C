@@ -301,6 +301,7 @@ class DemandeAdmin(admin.ModelAdmin):
     )
     search_fields = ('numero_demande', 'objet', 'description', 'source')
     list_filter = ('statut_demande', 'id_departement', 'date_creation', 'date_modification')
+    readonly_fields = ('numero_demande',)
 
 
 @admin.register(LigneDemande)
