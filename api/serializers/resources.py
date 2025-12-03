@@ -20,6 +20,7 @@ from ..models import (
     SignatureBC,
     SignatureNumerique,
     Transfert,
+    Utilisateur,
 )
 from .organisation import DepartementSerializer
 from .auth import UserSerializer
@@ -148,8 +149,25 @@ class LigneBudgetaireSerializer(BaseDepthSerializer):
 
 
 class DocumentSerializer(BaseDepthSerializer):
+    id_utilisateur = UserSerializer(read_only=True)
+    id_utilisateur_id = serializers.PrimaryKeyRelatedField(
+        queryset=Utilisateur.objects.all(),
+        source='id_utilisateur',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
     class Meta(BaseDepthSerializer.Meta):
         model = Document
+
+    def create(self, validated_data):
+        # Always attach the authenticated user when none is provided.
+        user = validated_data.pop('id_utilisateur', None) or self.context['request'].user
+        if user is None or not getattr(user, 'id', None):
+            raise serializers.ValidationError({'id_utilisateur': 'Utilisateur requis.'})
+        validated_data['id_utilisateur'] = user
+        return super().create(validated_data)
 
 
 class SignatureNumeriqueSerializer(BaseDepthSerializer):

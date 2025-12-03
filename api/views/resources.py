@@ -518,10 +518,7 @@ class DocumentViewSet(AuditModelViewSet):
     audit_type = 'DOCUMENT'
 
     def perform_create(self, serializer):
-        extra = {}
-        if 'id_utilisateur' not in serializer.validated_data:
-            extra['id_utilisateur'] = self.request.user
-        instance = serializer.save(**extra)
+        instance = serializer.save(id_utilisateur=self.request.user)
         log_audit(
             self.request.user,
             f'{self.audit_prefix}_create',
