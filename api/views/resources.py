@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -516,6 +517,7 @@ class DocumentViewSet(AuditModelViewSet):
     serializer_class = DocumentSerializer
     audit_prefix = 'document'
     audit_type = 'DOCUMENT'
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def perform_create(self, serializer):
         instance = serializer.save(id_utilisateur=self.request.user)

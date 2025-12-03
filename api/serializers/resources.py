@@ -149,6 +149,7 @@ class LigneBudgetaireSerializer(BaseDepthSerializer):
 
 
 class DocumentSerializer(BaseDepthSerializer):
+    chemin_fichier = serializers.FileField(allow_empty_file=False)
     id_utilisateur = UserSerializer(read_only=True)
     id_utilisateur_id = serializers.PrimaryKeyRelatedField(
         queryset=Utilisateur.objects.all(),
