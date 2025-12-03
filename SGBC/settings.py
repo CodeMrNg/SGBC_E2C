@@ -96,7 +96,6 @@ CORS_ALLOWED_ORIGINS = [
     "https://e2c-henna.vercel.app",
     "https://sgbc.aa-ce.org",
     "https://www.costafric.com",
-    "https://e2c-henna.vercel.app/auth/login"
 ]
 
 # Configuration CSRF pour les origines de confiance

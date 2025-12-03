@@ -173,17 +173,19 @@ class DocumentAdmin(admin.ModelAdmin):
     list_display = (
         'type_document',
         'reference_fonctionnelle',
+        'description',
         'id_utilisateur',
         'statut_archivage',
         'date_generation',
         'file_link',
     )
-    search_fields = ('type_document', 'reference_fonctionnelle', 'chemin_fichier')
+    search_fields = ('type_document', 'reference_fonctionnelle', 'description', 'chemin_fichier')
     list_filter = ('statut_archivage', 'date_generation')
     readonly_fields = ('file_preview', 'date_generation')
     fields = (
         'type_document',
         'reference_fonctionnelle',
+        'description',
         'chemin_fichier',
         'hash_contenu',
         'id_utilisateur',
@@ -194,7 +196,7 @@ class DocumentAdmin(admin.ModelAdmin):
 
     @staticmethod
     def _build_file_url(document: Document):
-        path = (document.chemin_fichier or '').strip()
+        path = (str(document.chemin_fichier or '')).strip()
         if not path:
             return None
         normalized_path = path.replace('\\', '/')
@@ -214,7 +216,7 @@ class DocumentAdmin(admin.ModelAdmin):
         url = self._build_file_url(obj)
         if not url:
             return '-'
-        extension = Path(obj.chemin_fichier).suffix.lower()
+        extension = Path(str(obj.chemin_fichier or '')).suffix.lower()
         if extension in IMAGE_EXTENSIONS:
             return format_html(
                 '<img src="{}" style="max-height:180px;max-width:260px;object-fit:contain;" />',

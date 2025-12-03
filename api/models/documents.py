@@ -13,7 +13,8 @@ class Document(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type_document = models.CharField(max_length=50)
     reference_fonctionnelle = models.CharField(max_length=255)
-    chemin_fichier = models.CharField(max_length=500)
+    description = models.TextField(blank=True)
+    chemin_fichier = models.FileField(upload_to='documents/', max_length=500)
     hash_contenu = models.CharField(max_length=128, blank=True)
     id_utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
