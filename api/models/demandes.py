@@ -76,7 +76,7 @@ class Demande(models.Model):
             self.numero_demande = self.generate_numero_demande()
         super().save(*args, **kwargs)
 
-
+# on selectionne le type qui peut etre soit 'Article' soit 'Service'  puis une designation 
 class LigneDemande(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     id_demande = models.ForeignKey(

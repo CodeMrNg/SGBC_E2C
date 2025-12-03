@@ -158,17 +158,72 @@ class DocumentSerializer(BaseDepthSerializer):
         required=False,
         allow_null=True,
     )
+    id_demande = serializers.PrimaryKeyRelatedField(
+        queryset=Demande.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    id_bc = serializers.PrimaryKeyRelatedField(
+        queryset=BonCommande.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
 
     class Meta(BaseDepthSerializer.Meta):
         model = Document
 
+    def validate(self, attrs):
+        """
+        Autorise id_demande/id_bc ou leurs alias demande_id/bc_id et impose
+        qu'au moins l'un des deux soit fourni à la création.
+        """
+        if 'id_demande' not in attrs:
+            demande_id = self.initial_data.get('demande_id') or self.initial_data.get('id_demande')
+            if demande_id:
+                try:
+                    attrs['id_demande'] = Demande.objects.get(pk=demande_id)
+                except Demande.DoesNotExist:
+                    raise serializers.ValidationError({'id_demande': 'Demande introuvable.'})
+
+        if 'id_bc' not in attrs:
+            bc_id = self.initial_data.get('bc_id') or self.initial_data.get('id_bc')
+            if bc_id:
+                try:
+                    attrs['id_bc'] = BonCommande.objects.get(pk=bc_id)
+                except BonCommande.DoesNotExist:
+                    raise serializers.ValidationError({'id_bc': 'Bon de commande introuvable.'})
+
+        if self.instance is None and not attrs.get('id_demande') and not attrs.get('id_bc'):
+            raise serializers.ValidationError({'non_field_errors': 'Fournir id_demande ou id_bc.'})
+
+        return attrs
+
     def create(self, validated_data):
+        demande = validated_data.pop('id_demande', None)
+        bc = validated_data.pop('id_bc', None)
         # Always attach the authenticated user when none is provided.
         user = validated_data.pop('id_utilisateur', None) or self.context['request'].user
         if user is None or not getattr(user, 'id', None):
             raise serializers.ValidationError({'id_utilisateur': 'Utilisateur requis.'})
         validated_data['id_utilisateur'] = user
-        return super().create(validated_data)
+        document = super().create(validated_data)
+        if demande:
+            document.demandes.add(demande)
+        if bc:
+            document.bons_commande.add(bc)
+        return document
+
+    def update(self, instance, validated_data):
+        demande = validated_data.pop('id_demande', None)
+        bc = validated_data.pop('id_bc', None)
+        document = super().update(instance, validated_data)
+        if demande:
+            document.demandes.add(demande)
+        if bc:
+            document.bons_commande.add(bc)
+        return document
 
 
 class SignatureNumeriqueSerializer(BaseDepthSerializer):
