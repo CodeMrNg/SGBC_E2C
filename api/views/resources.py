@@ -427,7 +427,8 @@ class DemandeViewSet(AuditModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        departement_source = demande.id_departement
+        last_transfer = demande.transferts.order_by('-date_transfert').first()
+        departement_source = last_transfer.departement_beneficiaire if last_transfer else demande.id_departement
         with transaction.atomic():
             demande.id_departement = departement
             demande.save(update_fields=['id_departement'])
@@ -864,7 +865,8 @@ class DashboardView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        departement_source = bc.id_departement
+        last_transfer = bc.transferts.order_by('-date_transfert').first()
+        departement_source = last_transfer.departement_beneficiaire if last_transfer else bc.id_departement
         with transaction.atomic():
             bc.id_departement = departement
             bc.save(update_fields=['id_departement'])
