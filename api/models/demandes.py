@@ -20,6 +20,7 @@ class Demande(models.Model):
     objet = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     source = models.CharField(max_length=150, blank=True, default='')
+    rapport_daa = models.CharField(max_length=255, blank=True, default='')
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
     date_validation_budget = models.DateTimeField(null=True, blank=True)

@@ -312,13 +312,14 @@ class DemandeAdmin(admin.ModelAdmin):
         'numero_demande',
         'objet',
         'source',
+        'rapport_daa',
         'id_departement',
         'statut_demande',
         'date_creation',
         'date_modification',
         'date_validation_budget',
     )
-    search_fields = ('numero_demande', 'objet', 'description', 'source')
+    search_fields = ('numero_demande', 'objet', 'description', 'source', 'rapport_daa')
     list_filter = ('statut_demande', 'id_departement', 'date_creation', 'date_modification')
     readonly_fields = ('numero_demande',)
 
