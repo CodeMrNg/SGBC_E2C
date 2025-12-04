@@ -89,7 +89,15 @@ class UtilisateurAdmin(UserAdmin):
         'profile_picture_preview',
     )
     list_display_links = ('login', 'email')
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'id_departement', 'id_role')
+    list_filter = (
+        'is_staff',
+        'is_superuser',
+        'is_active',
+        'peut_rediger',
+        'peut_signer',
+        'id_departement',
+        'id_role',
+    )
     search_fields = ('login', 'email', 'first_name', 'last_name', 'phone')
     ordering = ('login',)
     readonly_fields = ('profile_picture_preview',)

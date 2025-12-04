@@ -23,6 +23,8 @@ class UserSerializer(serializers.ModelSerializer):
             'profile_picture',
             'mfa_active',
             'mfa_method',
+            'peut_rediger',
+            'peut_signer',
             'departement',
             'role',
         ]

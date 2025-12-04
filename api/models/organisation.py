@@ -156,6 +156,8 @@ class Utilisateur(AbstractUser, BaseModel):
         choices=TwoFactorMethod.choices,
         default=TwoFactorMethod.EMAIL,
     )
+    peut_rediger = models.BooleanField(default=False)
+    peut_signer = models.BooleanField(default=False)
     id_departement = models.ForeignKey(
         'Departement',
         on_delete=models.PROTECT,

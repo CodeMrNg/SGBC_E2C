@@ -17,12 +17,21 @@ class UserManagementSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         model = User
-        fields = UserSerializer.Meta.fields + ['id_departement', 'id_role', 'actif', 'password']
+        fields = UserSerializer.Meta.fields + [
+            'id_departement',
+            'id_role',
+            'peut_rediger',
+            'peut_signer',
+            'actif',
+            'password',
+        ]
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
             'id_departement': {'required': False, 'allow_null': True},
             'id_role': {'required': False, 'allow_null': True},
             'actif': {'required': False},
+            'peut_rediger': {'required': False},
+            'peut_signer': {'required': False},
         }
 
     def validate_email(self, value):

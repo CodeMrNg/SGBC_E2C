@@ -24,6 +24,8 @@ class UtilisateurViewSet(AuditModelViewSet):
         departement = self.request.GET.get('departement_id')
         role = self.request.GET.get('role_id')
         mfa_active = self.request.GET.get('mfa_active')
+        peut_rediger = self.request.GET.get('peut_rediger')
+        peut_signer = self.request.GET.get('peut_signer')
         search = self.request.GET.get('search')
 
         if actif is not None:
@@ -34,6 +36,10 @@ class UtilisateurViewSet(AuditModelViewSet):
             qs = qs.filter(id_role_id=role)
         if mfa_active is not None:
             qs = qs.filter(mfa_active=mfa_active.lower() in ['true', '1', 'yes'])
+        if peut_rediger is not None:
+            qs = qs.filter(peut_rediger=peut_rediger.lower() in ['true', '1', 'yes'])
+        if peut_signer is not None:
+            qs = qs.filter(peut_signer=peut_signer.lower() in ['true', '1', 'yes'])
         if search:
             qs = qs.filter(
                 Q(login__icontains=search)

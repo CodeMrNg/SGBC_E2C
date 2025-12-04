@@ -176,6 +176,9 @@ ROLES_DATA = [
     {"code": "DSI", "libelle": "Responsable IT"},
 ]
 
+DEFAULT_USER_PASSWORD = "password123"
+USERS_PER_DEPARTEMENT = 4
+
 
 class Command(BaseCommand):
     help = "Seed de données de démonstration sur l'ensemble des modèles principaux."
@@ -188,6 +191,7 @@ class Command(BaseCommand):
         fournisseur_map = self._seed_fournisseurs()
         banque_map = self._seed_banques()
         role_map = self._seed_roles()
+        self._seed_users_per_departement(dep_map, role_map)
         user = self._seed_user(dep_map.get("DG"), role_map.get("ADMIN"))
 
         # Articles
@@ -682,6 +686,51 @@ class Command(BaseCommand):
             b_map[entry["code_banque"]] = obj
         return b_map
 
+    def _seed_users_per_departement(self, dep_map, role_map):
+        User = get_user_model()
+        role_sequence = ["ADMIN", "ACH", "FIN", "DSI"]
+        created = 0
+        updated = 0
+        phone_counter = 0
+
+        for code, departement in sorted(dep_map.items()):
+            for role_code in role_sequence[:USERS_PER_DEPARTEMENT]:
+                phone_counter += 1
+                login = f"{code.lower()}_{role_code.lower()}"
+                email = f"{login}@example.com"
+                phone = f"6{phone_counter:08d}"
+                role = role_map.get(role_code)
+                user_defaults = {
+                    "email": email,
+                    "phone": phone,
+                    "first_name": role_code.title(),
+                    "last_name": f"{code} User",
+                    "id_departement": departement,
+                    "id_role": role,
+                    "is_active": True,
+                    "is_staff": role_code == "ADMIN",
+                }
+                user, was_created = User.objects.get_or_create(login=login, defaults=user_defaults)
+                if was_created:
+                    user.set_password(DEFAULT_USER_PASSWORD)
+                    user.save()
+                    created += 1
+                    continue
+
+                changed = False
+                for field, value in user_defaults.items():
+                    if getattr(user, field) != value:
+                        setattr(user, field, value)
+                        changed = True
+                if not user.has_usable_password():
+                    user.set_password(DEFAULT_USER_PASSWORD)
+                    changed = True
+                if changed:
+                    user.save()
+                    updated += 1
+
+        return created, updated
+
     def _seed_user(self, departement, role=None):
         User = get_user_model()
         user, created = User.objects.get_or_create(
@@ -699,7 +748,7 @@ class Command(BaseCommand):
             },
         )
         if created:
-            user.set_password("password123")
+            user.set_password(DEFAULT_USER_PASSWORD)
             user.save()
         return user
 
