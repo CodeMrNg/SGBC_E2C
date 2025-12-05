@@ -62,7 +62,7 @@ SUPER_ADMIN_ROLES = {'SAD', 'SD'}
 
 
 def _user_role_code(user) -> str:
-    return (getattr(getattr(user, 'id_role', None), 'code', '') or '').upper()
+    return (getattr(getattr(user, 'id_role', None), 'code', '') or '').strip().upper()
 
 
 def user_is_sad(user) -> bool:
@@ -75,7 +75,7 @@ def user_is_sd(user) -> bool:
 
 def user_has_global_access(user) -> bool:
     # Global sauf cas spécifique géré par les filtres dédiés (ex: demandes/BC pour SD).
-    return user_is_sad(user) or user_is_sd(user) or getattr(user, 'is_superuser', False)
+    return user_is_sad(user) or user_is_sd(user)
 
 
 def user_departement_id(user):
@@ -111,7 +111,7 @@ def filter_transferts_for_user(qs, user):
 
 
 def filter_demandes_for_user(qs, user):
-    if user_is_sad(user) or getattr(user, 'is_superuser', False):
+    if user_is_sad(user):
         return qs
     departement_id = user_departement_id(user)
     if user_is_sd(user):
@@ -123,7 +123,7 @@ def filter_demandes_for_user(qs, user):
 
 
 def filter_bc_for_user(qs, user):
-    if user_is_sad(user) or getattr(user, 'is_superuser', False):
+    if user_is_sad(user):
         return qs
     departement_id = user_departement_id(user)
     if user_is_sd(user):
