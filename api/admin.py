@@ -183,12 +183,13 @@ class DocumentAdmin(admin.ModelAdmin):
         'reference_fonctionnelle',
         'description',
         'id_utilisateur',
+        'priorite',
         'statut_archivage',
         'date_generation',
         'file_link',
     )
     search_fields = ('type_document', 'reference_fonctionnelle', 'description', 'chemin_fichier')
-    list_filter = ('statut_archivage', 'date_generation')
+    list_filter = ('statut_archivage', 'priorite', 'date_generation')
     readonly_fields = ('file_preview', 'date_generation')
     fields = (
         'type_document',
@@ -196,6 +197,7 @@ class DocumentAdmin(admin.ModelAdmin):
         'description',
         'chemin_fichier',
         'hash_contenu',
+        'priorite',
         'id_utilisateur',
         'statut_archivage',
         'date_generation',

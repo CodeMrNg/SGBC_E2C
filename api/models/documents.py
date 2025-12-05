@@ -9,6 +9,12 @@ class StatutArchivage(models.TextChoices):
     ARCHIVE = ('archive', 'Archive')
 
 
+class PrioriteDocument(models.IntegerChoices):
+    UN = (1, '1')
+    DEUX = (2, '2')
+    TROIS = (3, '3')
+
+
 class Document(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type_document = models.CharField(max_length=50)
@@ -16,6 +22,10 @@ class Document(models.Model):
     description = models.TextField(blank=True)
     chemin_fichier = models.FileField(upload_to='documents/', max_length=500)
     hash_contenu = models.CharField(max_length=128, blank=True)
+    priorite = models.PositiveSmallIntegerField(
+        choices=PrioriteDocument.choices,
+        default=PrioriteDocument.UN,
+    )
     id_utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
