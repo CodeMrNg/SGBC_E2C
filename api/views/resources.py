@@ -8,6 +8,7 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from .mixins import AuditModelViewSet
 from ..auth_utils import log_audit
 from ..models import (
     Article,
@@ -56,7 +57,81 @@ from ..serializers.resources import (
     SignatureNumeriqueSerializer,
     TransfertSerializer,
 )
-from .mixins import AuditModelViewSet
+
+SUPER_ADMIN_ROLES = {'SAD', 'SD'}
+
+
+def _user_role_code(user) -> str:
+    return (getattr(getattr(user, 'id_role', None), 'code', '') or '').upper()
+
+
+def user_is_sad(user) -> bool:
+    return _user_role_code(user) == 'SAD'
+
+
+def user_is_sd(user) -> bool:
+    return _user_role_code(user) == 'SD'
+
+
+def user_has_global_access(user) -> bool:
+    # Global sauf cas spécifique géré par les filtres dédiés (ex: demandes/BC pour SD).
+    return user_is_sad(user) or user_is_sd(user) or getattr(user, 'is_superuser', False)
+
+
+def user_departement_id(user):
+    departement = getattr(user, 'id_departement', None)
+    return getattr(departement, 'id', None)
+
+
+def filter_by_departement(qs, user, field_name: str):
+    """
+    Restreint un queryset au département de l'utilisateur connecté,
+    sauf pour les rôles globaux (SAD/SD/superuser).
+    """
+    if user_has_global_access(user):
+        return qs
+    departement_id = user_departement_id(user)
+    if not departement_id:
+        return qs.none()
+    return qs.filter(**{field_name: departement_id})
+
+
+def filter_transferts_for_user(qs, user):
+    if user_has_global_access(user):
+        return qs
+    departement_id = user_departement_id(user)
+    if not departement_id:
+        return qs.none()
+    return qs.filter(
+        Q(departement_source_id=departement_id)
+        | Q(departement_beneficiaire_id=departement_id)
+        | Q(id_demande__id_departement_id=departement_id)
+        | Q(id_bc__id_departement_id=departement_id)
+    )
+
+
+def filter_demandes_for_user(qs, user):
+    if user_is_sad(user) or getattr(user, 'is_superuser', False):
+        return qs
+    departement_id = user_departement_id(user)
+    if user_is_sd(user):
+        brouillon_filter = ~Q(statut_demande=StatutDemande.BROUILLON)
+        if departement_id:
+            return qs.filter(brouillon_filter | Q(id_departement_id=departement_id))
+        return qs.filter(brouillon_filter)
+    return filter_by_departement(qs, user, 'id_departement_id')
+
+
+def filter_bc_for_user(qs, user):
+    if user_is_sad(user) or getattr(user, 'is_superuser', False):
+        return qs
+    departement_id = user_departement_id(user)
+    if user_is_sd(user):
+        brouillon_filter = ~Q(id_demande__statut_demande=StatutDemande.BROUILLON)
+        if departement_id:
+            return qs.filter(brouillon_filter | Q(id_departement_id=departement_id))
+        return qs.filter(brouillon_filter)
+    return filter_by_departement(qs, user, 'id_departement_id')
 
 
 class DeviseViewSet(AuditModelViewSet):
@@ -344,7 +419,7 @@ class DemandeViewSet(AuditModelViewSet):
                 qs = qs.filter(date_creation__date__lte=parsed)
         if search:
             qs = qs.filter(Q(numero_demande__icontains=search) | Q(objet__icontains=search))
-        return qs
+        return filter_demandes_for_user(qs, self.request.user)
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
@@ -473,7 +548,7 @@ class LigneDemandeViewSet(AuditModelViewSet):
             qs = qs.filter(id_article_id=article)
         if fournisseur:
             qs = qs.filter(id_fournisseur_id=fournisseur)
-        return qs
+        return filter_by_departement(qs, self.request.user, 'id_demande__id_departement_id')
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
@@ -503,7 +578,8 @@ class LigneBudgetaireViewSet(AuditModelViewSet):
             qs = qs.filter(id_departement_id=departement)
         if exercice:
             qs = qs.filter(exercice=exercice)
-        return qs.order_by('code_ligne')
+        qs = qs.order_by('code_ligne')
+        return filter_by_departement(qs, self.request.user, 'id_departement_id')
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
@@ -547,7 +623,7 @@ class DocumentViewSet(AuditModelViewSet):
             qs = qs.filter(id_utilisateur_id=user)
         if statut:
             qs = qs.filter(statut_archivage=statut)
-        return qs
+        return filter_by_departement(qs, self.request.user, 'id_utilisateur__id_departement_id')
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
@@ -622,7 +698,7 @@ class TransfertViewSet(AuditModelViewSet):
             qs = qs.filter(agent_id=agent)
         if statut:
             qs = qs.filter(statut=statut)
-        return qs
+        return filter_transferts_for_user(qs, self.request.user)
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
@@ -697,7 +773,7 @@ class BonCommandeViewSet(AuditModelViewSet):
             parsed = parse_date(date_fin)
             if parsed:
                 qs = qs.filter(date_creation__date__lte=parsed)
-        return qs
+        return filter_bc_for_user(qs, self.request.user)
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
@@ -762,6 +838,7 @@ class DashboardView(APIView):
     """
 
     def get(self, request, format=None):
+        user = request.user
         demandes_qs = Demande.objects.select_related('id_departement').prefetch_related('lignes', 'documents')
         bc_qs = BonCommande.objects.select_related(
             'id_demande',
@@ -773,6 +850,9 @@ class DashboardView(APIView):
             'id_redacteur',
             'id_demande_valider',
         ).prefetch_related('lignes', 'documents')
+
+        demandes_qs = filter_demandes_for_user(demandes_qs, user)
+        bc_qs = filter_bc_for_user(bc_qs, user)
 
         demande_par_statut = dict(
             demandes_qs.values_list('statut_demande').annotate(total=models.Count('id'))
@@ -810,12 +890,22 @@ class DashboardView(APIView):
                 'demandes_par_statut': demande_par_statut,
                 'bons_commande_total': bc_qs.count(),
                 'bons_commande_par_statut': bc_par_statut,
-                'lignes_demande_total': LigneDemande.objects.count(),
-                'lignes_bc_total': LigneBC.objects.count(),
-                'documents_total': Document.objects.count(),
-                'transferts_total': Transfert.objects.count(),
-                'factures_total': Facture.objects.count(),
-                'paiements_total': Paiement.objects.count(),
+                'lignes_demande_total': filter_by_departement(
+                    LigneDemande.objects.all(), user, 'id_demande__id_departement_id'
+                ).count(),
+                'lignes_bc_total': LigneBC.objects.filter(
+                    id_bc__in=filter_bc_for_user(BonCommande.objects.all(), user).values('id')
+                ).count(),
+                'documents_total': filter_by_departement(
+                    Document.objects.all(), user, 'id_utilisateur__id_departement_id'
+                ).count(),
+                'transferts_total': filter_transferts_for_user(Transfert.objects.all(), user).count(),
+                'factures_total': filter_by_departement(
+                    Facture.objects.all(), user, 'id_bc__id_departement_id'
+                ).count(),
+                'paiements_total': filter_by_departement(
+                    Paiement.objects.all(), user, 'id_facture__id_bc__id_departement_id'
+                ).count(),
                 'fournisseurs_total': Fournisseur.objects.count(),
                 'articles_total': Article.objects.count(),
                 'devises_total': Devise.objects.count(),
@@ -919,7 +1009,7 @@ class LigneBCViewSet(AuditModelViewSet):
             qs = qs.filter(id_bc_id=bc)
         if article:
             qs = qs.filter(id_article_id=article)
-        return qs
+        return filter_by_departement(qs, self.request.user, 'id_bc__id_departement_id')
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
@@ -980,7 +1070,7 @@ class FactureViewSet(AuditModelViewSet):
             qs = qs.filter(id_bc_id=bc)
         if statut:
             qs = qs.filter(statut_facture=statut)
-        return qs
+        return filter_by_departement(qs, self.request.user, 'id_bc__id_departement_id')
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
@@ -1022,7 +1112,7 @@ class PaiementViewSet(AuditModelViewSet):
             qs = qs.filter(id_banque_id=banque)
         if statut:
             qs = qs.filter(statut_paiement=statut)
-        return qs
+        return filter_by_departement(qs, self.request.user, 'id_facture__id_bc__id_departement_id')
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
