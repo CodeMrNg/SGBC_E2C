@@ -308,6 +308,11 @@ class DepartementPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         return DepartementSerializer(value, context=self.context).data
 
 
+class DevisePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    def to_representation(self, value):
+        return DeviseSerializer(value, context=self.context).data
+
+
 class LigneBCSerializer(BaseDepthSerializer):
     id_article = ArticleSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
@@ -383,7 +388,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
         allow_null=True,
     )
     id_methode_paiement = MethodePaiementSerializer(read_only=True)
-    id_devise = DeviseSerializer(read_only=True)
+    id_devise = DevisePrimaryKeyRelatedField(queryset=Devise.objects.all())
     id_ligne_budgetaire = LigneBudgetaireSerializer(read_only=True)
     transferts = TransfertLiteSerializer(many=True, read_only=True)
 
@@ -399,6 +404,9 @@ class BonCommandeSerializer(BaseDepthSerializer):
         departement_id = data.get('departement_id')
         if departement_id and 'id_departement' not in data:
             data['id_departement'] = departement_id
+        devise_id = data.get('devise_id')
+        if devise_id and 'id_devise' not in data:
+            data['id_devise'] = devise_id
         return super().to_internal_value(data)
 
     def validate(self, attrs):
