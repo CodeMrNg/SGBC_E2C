@@ -364,6 +364,14 @@ class BonCommandeSerializer(BaseDepthSerializer):
     id_fournisseur = FournisseurSerializer(read_only=True)
     id_departement = DepartementSerializer(read_only=True)
     agent_traitant = UserSerializer(read_only=True)
+    id_redacteur = UserSerializer(read_only=True)
+    id_redacteur_id = serializers.PrimaryKeyRelatedField(
+        queryset=Utilisateur.objects.all(),
+        source='id_redacteur',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
     id_methode_paiement = MethodePaiementSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
     id_ligne_budgetaire = LigneBudgetaireSerializer(read_only=True)
@@ -372,6 +380,24 @@ class BonCommandeSerializer(BaseDepthSerializer):
     class Meta(BaseDepthSerializer.Meta):
         model = BonCommande
         read_only_fields = ('numero_bc',)
+
+    def validate(self, attrs):
+        """
+        Force l'association d'un rédacteur sur création si absent du payload.
+        """
+        if self.instance is None and 'id_redacteur' not in attrs:
+            redacteur_id = self.initial_data.get('id_redacteur') or self.initial_data.get('id_redacteur_id')
+            if redacteur_id not in [None, '', 'null']:
+                try:
+                    attrs['id_redacteur'] = Utilisateur.objects.get(pk=redacteur_id)
+                except Utilisateur.DoesNotExist:
+                    raise serializers.ValidationError({'id_redacteur': 'Rédacteur introuvable.'})
+            else:
+                user = getattr(self.context.get('request'), 'user', None)
+                if user is None or not getattr(user, 'id', None):
+                    raise serializers.ValidationError({'id_redacteur': 'Rédacteur requis.'})
+                attrs['id_redacteur'] = user
+        return attrs
 
 
 class SignatureBCSerializer(BaseDepthSerializer):
