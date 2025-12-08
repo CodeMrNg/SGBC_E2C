@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 
 from django.conf import settings
-from django.db import models, transaction, IntegrityError
+from django.db import models, transaction
 
 
 class StatutBC(models.TextChoices):
@@ -16,6 +16,15 @@ class DecisionSignature(models.TextChoices):
     EN_ATTENTE = ('en_attente', 'En attente')
     APPROUVE = ('approuve', 'Approuve')
     REFUSE = ('refuse', 'Refuse')
+
+
+class BonCommandeSequence(models.Model):
+    year = models.PositiveIntegerField(primary_key=True)
+    last_sequence = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = 'Séquence bon de commande'
+        verbose_name_plural = 'Séquences bons de commande'
 
 
 class BonCommande(models.Model):
@@ -133,24 +142,19 @@ class BonCommande(models.Model):
     @classmethod
     def generate_numero_bc(cls) -> str:
         year = datetime.now().year
-        sequence = cls._next_sequence_for_year(year)
-        return f'{sequence}/DAA/DG/{year}'
+        with transaction.atomic():
+            sequence_obj, _ = BonCommandeSequence.objects.select_for_update().get_or_create(
+                year=year,
+                defaults={'last_sequence': 0},
+            )
+            next_sequence = sequence_obj.last_sequence + 1
+            sequence_obj.last_sequence = next_sequence
+            sequence_obj.save(update_fields=['last_sequence'])
+        return f'{next_sequence}/DAA/DG/{year}'
 
     def save(self, *args, **kwargs):
         if not self.numero_bc:
-            max_attempts = 5
-            for attempt in range(max_attempts):
-                self.numero_bc = self.generate_numero_bc()
-                try:
-                    with transaction.atomic():
-                        super().save(*args, **kwargs)
-                    return
-                except IntegrityError as exc:
-                    if 'numero_bc' not in str(exc).lower():
-                        raise
-                    if attempt == max_attempts - 1:
-                        raise
-            return
+            self.numero_bc = self.generate_numero_bc()
         super().save(*args, **kwargs)
 
 
