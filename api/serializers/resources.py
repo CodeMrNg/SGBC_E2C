@@ -298,6 +298,11 @@ class DemandeSerializer(BaseDepthSerializer):
         return attrs
 
 
+class DemandePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    def to_representation(self, value):
+        return DemandeSerializer(value, context=self.context).data
+
+
 class LigneBCSerializer(BaseDepthSerializer):
     id_article = ArticleSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
@@ -360,15 +365,9 @@ class LigneBCSerializer(BaseDepthSerializer):
 class BonCommandeSerializer(BaseDepthSerializer):
     lignes = LigneBCSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
-    id_demande = DemandeSerializer(read_only=True)
+    id_demande = DemandePrimaryKeyRelatedField(queryset=Demande.objects.all())
     id_fournisseur = FournisseurSerializer(read_only=True)
     id_departement = DepartementSerializer(read_only=True)
-    id_demande_id = serializers.PrimaryKeyRelatedField(
-        queryset=Demande.objects.all(),
-        source='id_demande',
-        write_only=True,
-        required=False,
-    )
     agent_traitant = UserSerializer(read_only=True)
     id_redacteur = UserSerializer(read_only=True)
     id_redacteur_id = serializers.PrimaryKeyRelatedField(
@@ -387,20 +386,17 @@ class BonCommandeSerializer(BaseDepthSerializer):
         model = BonCommande
         read_only_fields = ('numero_bc',)
 
+    def to_internal_value(self, data):
+        data = dict(data)
+        demande_id = data.get('demande_id')
+        if demande_id and 'id_demande' not in data:
+            data['id_demande'] = demande_id
+        return super().to_internal_value(data)
+
     def validate(self, attrs):
         """
         Force l'association d'un rédacteur sur création si absent du payload.
         """
-        if 'id_demande' not in attrs and self.instance is None:
-            demande_id = self.initial_data.get('demande_id') or self.initial_data.get('id_demande')
-            if demande_id:
-                try:
-                    attrs['id_demande'] = Demande.objects.get(pk=demande_id)
-                except Demande.DoesNotExist:
-                    raise serializers.ValidationError({'id_demande': 'Demande introuvable.'})
-            else:
-                raise serializers.ValidationError({'id_demande': 'Ce champ est requis.'})
-
         if self.instance is None and 'id_redacteur' not in attrs:
             redacteur_id = self.initial_data.get('id_redacteur') or self.initial_data.get('id_redacteur_id')
             if redacteur_id not in [None, '', 'null']:
