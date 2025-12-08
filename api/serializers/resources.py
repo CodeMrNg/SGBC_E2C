@@ -313,6 +313,11 @@ class DevisePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         return DeviseSerializer(value, context=self.context).data
 
 
+class FournisseurPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    def to_representation(self, value):
+        return FournisseurSerializer(value, context=self.context).data
+
+
 class LigneBCSerializer(BaseDepthSerializer):
     id_article = ArticleSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
@@ -376,7 +381,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
     lignes = LigneBCSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
     id_demande = DemandePrimaryKeyRelatedField(queryset=Demande.objects.all())
-    id_fournisseur = FournisseurSerializer(read_only=True)
+    id_fournisseur = FournisseurPrimaryKeyRelatedField(queryset=Fournisseur.objects.all())
     id_departement = DepartementPrimaryKeyRelatedField(queryset=Departement.objects.all())
     agent_traitant = UserSerializer(read_only=True)
     id_redacteur = UserSerializer(read_only=True)
@@ -407,6 +412,9 @@ class BonCommandeSerializer(BaseDepthSerializer):
         devise_id = data.get('devise_id')
         if devise_id and 'id_devise' not in data:
             data['id_devise'] = devise_id
+        fournisseur_id = data.get('fournisseur_id')
+        if fournisseur_id and 'id_fournisseur' not in data:
+            data['id_fournisseur'] = fournisseur_id
         return super().to_internal_value(data)
 
     def validate(self, attrs):
