@@ -298,26 +298,6 @@ class DemandeSerializer(BaseDepthSerializer):
         return attrs
 
 
-class DemandePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
-    def to_representation(self, value):
-        return DemandeSerializer(value, context=self.context).data
-
-
-class DepartementPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
-    def to_representation(self, value):
-        return DepartementSerializer(value, context=self.context).data
-
-
-class DevisePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
-    def to_representation(self, value):
-        return DeviseSerializer(value, context=self.context).data
-
-
-class FournisseurPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
-    def to_representation(self, value):
-        return FournisseurSerializer(value, context=self.context).data
-
-
 class LigneBCSerializer(BaseDepthSerializer):
     id_article = ArticleSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
@@ -380,9 +360,27 @@ class LigneBCSerializer(BaseDepthSerializer):
 class BonCommandeSerializer(BaseDepthSerializer):
     lignes = LigneBCSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
-    id_demande = DemandePrimaryKeyRelatedField(queryset=Demande.objects.all())
-    id_fournisseur = FournisseurPrimaryKeyRelatedField(queryset=Fournisseur.objects.all())
-    id_departement = DepartementPrimaryKeyRelatedField(queryset=Departement.objects.all())
+    id_demande = DemandeSerializer(read_only=True)
+    id_demande_id = serializers.PrimaryKeyRelatedField(
+        queryset=Demande.objects.all(),
+        source='id_demande',
+        write_only=True,
+        required=False,
+    )
+    id_fournisseur = FournisseurSerializer(read_only=True)
+    id_fournisseur_id = serializers.PrimaryKeyRelatedField(
+        queryset=Fournisseur.objects.all(),
+        source='id_fournisseur',
+        write_only=True,
+        required=False,
+    )
+    id_departement = DepartementSerializer(read_only=True)
+    id_departement_id = serializers.PrimaryKeyRelatedField(
+        queryset=Departement.objects.all(),
+        source='id_departement',
+        write_only=True,
+        required=False,
+    )
     agent_traitant = UserSerializer(read_only=True)
     id_redacteur = UserSerializer(read_only=True)
     id_redacteur_id = serializers.PrimaryKeyRelatedField(
@@ -393,7 +391,13 @@ class BonCommandeSerializer(BaseDepthSerializer):
         allow_null=True,
     )
     id_methode_paiement = MethodePaiementSerializer(read_only=True)
-    id_devise = DevisePrimaryKeyRelatedField(queryset=Devise.objects.all())
+    id_devise = DeviseSerializer(read_only=True)
+    id_devise_id = serializers.PrimaryKeyRelatedField(
+        queryset=Devise.objects.all(),
+        source='id_devise',
+        write_only=True,
+        required=False,
+    )
     id_ligne_budgetaire = LigneBudgetaireSerializer(read_only=True)
     transferts = TransfertLiteSerializer(many=True, read_only=True)
 
@@ -403,18 +407,22 @@ class BonCommandeSerializer(BaseDepthSerializer):
 
     def to_internal_value(self, data):
         data = dict(data)
-        demande_id = data.get('demande_id')
-        if demande_id and 'id_demande' not in data:
-            data['id_demande'] = demande_id
-        departement_id = data.get('departement_id')
-        if departement_id and 'id_departement' not in data:
-            data['id_departement'] = departement_id
-        devise_id = data.get('devise_id')
-        if devise_id and 'id_devise' not in data:
-            data['id_devise'] = devise_id
-        fournisseur_id = data.get('fournisseur_id')
-        if fournisseur_id and 'id_fournisseur' not in data:
-            data['id_fournisseur'] = fournisseur_id
+        if 'id_demande' in data and 'id_demande_id' not in data:
+            data['id_demande_id'] = data.pop('id_demande')
+        elif 'demande_id' in data and 'id_demande_id' not in data:
+            data['id_demande_id'] = data['demande_id']
+        if 'id_departement' in data and 'id_departement_id' not in data:
+            data['id_departement_id'] = data.pop('id_departement')
+        elif 'departement_id' in data and 'id_departement_id' not in data:
+            data['id_departement_id'] = data['departement_id']
+        if 'id_devise' in data and 'id_devise_id' not in data:
+            data['id_devise_id'] = data.pop('id_devise')
+        elif 'devise_id' in data and 'id_devise_id' not in data:
+            data['id_devise_id'] = data['devise_id']
+        if 'id_fournisseur' in data and 'id_fournisseur_id' not in data:
+            data['id_fournisseur_id'] = data.pop('id_fournisseur')
+        elif 'fournisseur_id' in data and 'id_fournisseur_id' not in data:
+            data['id_fournisseur_id'] = data['fournisseur_id']
         return super().to_internal_value(data)
 
     def validate(self, attrs):
