@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction, IntegrityError
 
 
 class StatutBC(models.TextChoices):
@@ -138,7 +138,19 @@ class BonCommande(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.numero_bc:
-            self.numero_bc = self.generate_numero_bc()
+            max_attempts = 5
+            for attempt in range(max_attempts):
+                self.numero_bc = self.generate_numero_bc()
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                    return
+                except IntegrityError as exc:
+                    if 'numero_bc' not in str(exc).lower():
+                        raise
+                    if attempt == max_attempts - 1:
+                        raise
+            return
         super().save(*args, **kwargs)
 
 
