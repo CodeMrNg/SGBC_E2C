@@ -150,7 +150,7 @@ class BonCommande(models.Model):
             next_sequence = sequence_obj.last_sequence + 1
             sequence_obj.last_sequence = next_sequence
             sequence_obj.save(update_fields=['last_sequence'])
-        return f'{next_sequence}/DAA/DG/{year}'
+        return f'BC/NUM{next_sequence}/DAA/DG/{year}'
 
     def save(self, *args, **kwargs):
         if not self.numero_bc:
