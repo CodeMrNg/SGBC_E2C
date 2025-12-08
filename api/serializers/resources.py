@@ -363,6 +363,12 @@ class BonCommandeSerializer(BaseDepthSerializer):
     id_demande = DemandeSerializer(read_only=True)
     id_fournisseur = FournisseurSerializer(read_only=True)
     id_departement = DepartementSerializer(read_only=True)
+    id_demande_id = serializers.PrimaryKeyRelatedField(
+        queryset=Demande.objects.all(),
+        source='id_demande',
+        write_only=True,
+        required=False,
+    )
     agent_traitant = UserSerializer(read_only=True)
     id_redacteur = UserSerializer(read_only=True)
     id_redacteur_id = serializers.PrimaryKeyRelatedField(
@@ -385,6 +391,16 @@ class BonCommandeSerializer(BaseDepthSerializer):
         """
         Force l'association d'un rédacteur sur création si absent du payload.
         """
+        if 'id_demande' not in attrs and self.instance is None:
+            demande_id = self.initial_data.get('demande_id') or self.initial_data.get('id_demande')
+            if demande_id:
+                try:
+                    attrs['id_demande'] = Demande.objects.get(pk=demande_id)
+                except Demande.DoesNotExist:
+                    raise serializers.ValidationError({'id_demande': 'Demande introuvable.'})
+            else:
+                raise serializers.ValidationError({'id_demande': 'Ce champ est requis.'})
+
         if self.instance is None and 'id_redacteur' not in attrs:
             redacteur_id = self.initial_data.get('id_redacteur') or self.initial_data.get('id_redacteur_id')
             if redacteur_id not in [None, '', 'null']:
