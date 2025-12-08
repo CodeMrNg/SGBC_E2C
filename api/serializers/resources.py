@@ -303,6 +303,11 @@ class DemandePrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
         return DemandeSerializer(value, context=self.context).data
 
 
+class DepartementPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    def to_representation(self, value):
+        return DepartementSerializer(value, context=self.context).data
+
+
 class LigneBCSerializer(BaseDepthSerializer):
     id_article = ArticleSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
@@ -367,7 +372,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
     documents = DocumentSerializer(many=True, read_only=True)
     id_demande = DemandePrimaryKeyRelatedField(queryset=Demande.objects.all())
     id_fournisseur = FournisseurSerializer(read_only=True)
-    id_departement = DepartementSerializer(read_only=True)
+    id_departement = DepartementPrimaryKeyRelatedField(queryset=Departement.objects.all())
     agent_traitant = UserSerializer(read_only=True)
     id_redacteur = UserSerializer(read_only=True)
     id_redacteur_id = serializers.PrimaryKeyRelatedField(
@@ -391,6 +396,9 @@ class BonCommandeSerializer(BaseDepthSerializer):
         demande_id = data.get('demande_id')
         if demande_id and 'id_demande' not in data:
             data['id_demande'] = demande_id
+        departement_id = data.get('departement_id')
+        if departement_id and 'id_departement' not in data:
+            data['id_departement'] = departement_id
         return super().to_internal_value(data)
 
     def validate(self, attrs):
