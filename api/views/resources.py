@@ -114,12 +114,17 @@ def filter_demandes_for_user(qs, user):
     if user_is_sad(user):
         return qs
     departement_id = user_departement_id(user)
+    has_user_access = bool(user and getattr(user, 'is_authenticated', False))
+    transfert_filter = Q(utilisateurs_transferts=user) if has_user_access else Q(pk__isnull=True)
     if user_is_sd(user):
         brouillon_filter = ~Q(statut_demande=StatutDemande.BROUILLON)
         if departement_id:
-            return qs.filter(brouillon_filter | Q(id_departement_id=departement_id))
-        return qs.filter(brouillon_filter)
-    return filter_by_departement(qs, user, 'id_departement_id')
+            return qs.filter(brouillon_filter | Q(id_departement_id=departement_id) | transfert_filter).distinct()
+        return qs.filter(brouillon_filter | transfert_filter).distinct()
+    dept_qs = filter_by_departement(qs, user, 'id_departement_id')
+    if not user:
+        return dept_qs
+    return (dept_qs | qs.filter(transfert_filter)).distinct()
 
 
 def filter_bc_for_user(qs, user):

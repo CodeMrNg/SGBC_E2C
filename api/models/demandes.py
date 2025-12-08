@@ -46,6 +46,11 @@ class Demande(models.Model):
         related_name='demandes',
         blank=True,
     )
+    utilisateurs_transferts = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='demandes_transferees',
+        blank=True,
+    )
 
     def __str__(self) -> str:
         return self.numero_demande
