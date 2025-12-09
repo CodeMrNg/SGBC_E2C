@@ -267,6 +267,7 @@ class TransfertLiteSerializer(serializers.ModelSerializer):
 class DemandeSerializer(BaseDepthSerializer):
     lignes = LigneDemandeSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
+    bons_commande = BonCommandeSerializer(many=True, read_only=True)
     id_departement = DepartementSerializer(read_only=True)
     id_departement_id = serializers.PrimaryKeyRelatedField(
         queryset=Departement.objects.all(),
