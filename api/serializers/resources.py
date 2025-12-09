@@ -267,7 +267,7 @@ class TransfertLiteSerializer(serializers.ModelSerializer):
 class DemandeSerializer(BaseDepthSerializer):
     lignes = LigneDemandeSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
-    bons_commande = BonCommandeSerializer(many=True, read_only=True)
+    bons_commande = serializers.SerializerMethodField()
     id_departement = DepartementSerializer(read_only=True)
     id_departement_id = serializers.PrimaryKeyRelatedField(
         queryset=Departement.objects.all(),
@@ -297,6 +297,9 @@ class DemandeSerializer(BaseDepthSerializer):
         if self.instance is None and 'id_departement' not in attrs:
             raise serializers.ValidationError({'id_departement': 'Ce champ est requis.'})
         return attrs
+
+    def get_bons_commande(self, obj):
+        return BonCommandeSerializer(obj.bons_commande.all(), many=True, context=self.context).data
 
 
 class LigneBCSerializer(BaseDepthSerializer):
