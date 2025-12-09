@@ -188,6 +188,22 @@ class DocumentSerializer(BaseDepthSerializer):
 
     class Meta(BaseDepthSerializer.Meta):
         model = Document
+        depth = 0
+        fields = (
+            'id',
+            'type_document',
+            'reference_fonctionnelle',
+            'description',
+            'chemin_fichier',
+            'hash_contenu',
+            'priorite',
+            'id_utilisateur',
+            'id_utilisateur_id',
+            'date_generation',
+            'statut_archivage',
+            'id_demande',
+            'id_bc',
+        )
 
     def validate(self, attrs):
         """
