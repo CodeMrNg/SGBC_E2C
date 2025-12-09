@@ -302,6 +302,22 @@ class DemandeSerializer(BaseDepthSerializer):
         return BonCommandeSerializer(obj.bons_commande.all(), many=True, context=self.context).data
 
 
+class DemandeReferenceSerializer(BaseDepthSerializer):
+    """Minimal serializer used when embedding a demande inside a bon de commande to avoid recursion."""
+
+    class Meta(BaseDepthSerializer.Meta):
+        model = Demande
+        fields = (
+            'id',
+            'numero_demande',
+            'objet',
+            'statut_demande',
+            'id_departement',
+            'agent_traitant',
+            'date_creation',
+        )
+
+
 class LigneBCSerializer(BaseDepthSerializer):
     id_article = ArticleSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
@@ -364,7 +380,7 @@ class LigneBCSerializer(BaseDepthSerializer):
 class BonCommandeSerializer(BaseDepthSerializer):
     lignes = LigneBCSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
-    id_demande = DemandeSerializer(read_only=True)
+    id_demande = DemandeReferenceSerializer(read_only=True)
     id_demande_id = serializers.PrimaryKeyRelatedField(
         queryset=Demande.objects.all(),
         source='id_demande',
