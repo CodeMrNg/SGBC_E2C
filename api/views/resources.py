@@ -836,6 +836,69 @@ class BonCommandeViewSet(AuditModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @action(detail=True, methods=['post'], url_path='transfer')
+    def transfer(self, request, pk=None):
+        departement_id = request.data.get('departement_id')
+        raison = (request.data.get('raison') or '').strip()
+        if not departement_id:
+            return Response(
+                {'message': 'Validation échouée', 'detail': 'Le champ departement_id est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not raison:
+            return Response(
+                {'message': 'Validation échouée', 'detail': 'Le champ raison est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        departement = get_object_or_404(Departement, pk=departement_id)
+        bc = self.get_object()
+
+        if bc.id_departement_id == departement.id:
+            return Response(
+                {'message': 'Validation échouée', 'detail': 'Le bon de commande est déjà rattaché à ce département.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        last_transfer = bc.transferts.order_by('-date_transfert').first()
+        departement_source = last_transfer.departement_beneficiaire if last_transfer else bc.id_departement
+        with transaction.atomic():
+            bc.id_departement = departement
+            bc.save(update_fields=['id_departement'])
+            demande_updated = False
+            if bc.id_demande and bc.id_demande.id_departement_id != departement.id:
+                bc.id_demande.id_departement = departement
+                bc.id_demande.save(update_fields=['id_departement'])
+                demande_updated = True
+            Transfert.objects.create(
+                departement_source=departement_source,
+                departement_beneficiaire=departement,
+                statut=StatutTransfert.VALIDE,
+                raison=raison,
+                agent=request.user,
+                id_bc=bc,
+                id_demande=bc.id_demande,
+            )
+
+            log_audit(
+                request.user,
+                'bon_commande_transfer',
+                type_objet=self.audit_type,
+                id_objet=bc.id,
+                request=request,
+                details=(
+                    f'Transfert vers le département {departement.id}'
+                    + (' avec mise à jour de la demande liée' if demande_updated else '')
+                    + f' | raison: {raison}'
+                ),
+            )
+
+        serializer = self.get_serializer(bc)
+        return Response(
+            {'message': 'Transfert de bon de commande effectué avec succès', 'data': serializer.data},
+            status=status.HTTP_200_OK,
+        )
+
 
 class DashboardView(APIView):
     """
@@ -935,69 +998,6 @@ class DashboardView(APIView):
             'derniers_bons_commande_par_statut': bc_by_status,
         }
         return Response({'message': 'Dashboard récupéré avec succès', 'data': data}, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['post'], url_path='transfer')
-    def transfer(self, request, pk=None):
-        departement_id = request.data.get('departement_id')
-        raison = (request.data.get('raison') or '').strip()
-        if not departement_id:
-            return Response(
-                {'message': 'Validation échouée', 'detail': 'Le champ departement_id est requis.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if not raison:
-            return Response(
-                {'message': 'Validation échouée', 'detail': 'Le champ raison est requis.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        departement = get_object_or_404(Departement, pk=departement_id)
-        bc = self.get_object()
-
-        if bc.id_departement_id == departement.id:
-            return Response(
-                {'message': 'Validation échouée', 'detail': 'Le bon de commande est déjà rattaché à ce département.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        last_transfer = bc.transferts.order_by('-date_transfert').first()
-        departement_source = last_transfer.departement_beneficiaire if last_transfer else bc.id_departement
-        with transaction.atomic():
-            bc.id_departement = departement
-            bc.save(update_fields=['id_departement'])
-            demande_updated = False
-            if bc.id_demande and bc.id_demande.id_departement_id != departement.id:
-                bc.id_demande.id_departement = departement
-                bc.id_demande.save(update_fields=['id_departement'])
-                demande_updated = True
-            Transfert.objects.create(
-                departement_source=departement_source,
-                departement_beneficiaire=departement,
-                statut=StatutTransfert.VALIDE,
-                raison=raison,
-                agent=request.user,
-                id_bc=bc,
-                id_demande=bc.id_demande,
-            )
-
-            log_audit(
-                request.user,
-                'bon_commande_transfer',
-                type_objet=self.audit_type,
-                id_objet=bc.id,
-                request=request,
-                details=(
-                    f'Transfert vers le département {departement.id}'
-                    + (' avec mise à jour de la demande liée' if demande_updated else '')
-                    + f' | raison: {raison}'
-                ),
-            )
-
-        serializer = self.get_serializer(bc)
-        return Response(
-            {'message': 'Transfert de bon de commande effectué avec succès', 'data': serializer.data},
-            status=status.HTTP_200_OK,
-        )
 
 
 class LigneBCViewSet(AuditModelViewSet):
