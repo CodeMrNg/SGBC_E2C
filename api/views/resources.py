@@ -310,6 +310,41 @@ class FournisseurViewSet(AuditModelViewSet):
         }
         return Response({'message': 'Statistiques des fournisseurs', 'data': data}, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['get'], url_path='associations')
+    def associations(self, request, pk=None):
+        fournisseur = self.get_object()
+        demandes_qs = (
+            Demande.objects.select_related('id_departement', 'agent_traitant')
+            .prefetch_related('lignes__id_article', 'lignes__id_fournisseur', 'documents')
+            .filter(lignes__id_fournisseur=fournisseur)
+            .distinct()
+            .order_by('-date_creation')
+        )
+        bc_qs = (
+            BonCommande.objects.select_related(
+                'id_demande',
+                'id_fournisseur',
+                'id_departement',
+                'agent_traitant',
+                'id_methode_paiement',
+                'id_devise',
+                'id_ligne_budgetaire',
+                'id_redacteur',
+                'id_demande_valider',
+            )
+            .prefetch_related('lignes__id_article', 'lignes__id_devise', 'documents')
+            .filter(id_fournisseur=fournisseur)
+            .order_by('-date_creation')
+        )
+        demandes_qs = filter_demandes_for_user(demandes_qs, request.user)
+        bc_qs = filter_bc_for_user(bc_qs, request.user)
+        data = {
+            'fournisseur': self.get_serializer(fournisseur).data,
+            'demandes': DemandeSerializer(demandes_qs, many=True, context=self.get_serializer_context()).data,
+            'bons_commande': BonCommandeSerializer(bc_qs, many=True, context=self.get_serializer_context()).data,
+        }
+        return Response({'message': 'Associations fournisseur', 'data': data}, status=status.HTTP_200_OK)
+
 
 class BanqueViewSet(AuditModelViewSet):
     queryset = Banque.objects.all().order_by('code_banque')

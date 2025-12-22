@@ -1,7 +1,8 @@
 import uuid
+from datetime import datetime
 
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 
 
 class StatutArchivage(models.TextChoices):
@@ -15,10 +16,19 @@ class PrioriteDocument(models.IntegerChoices):
     TROIS = (3, '3')
 
 
+class DocumentSequence(models.Model):
+    year = models.PositiveIntegerField(primary_key=True)
+    last_sequence = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = 'Sequence document'
+        verbose_name_plural = 'Sequences documents'
+
+
 class Document(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type_document = models.CharField(max_length=50)
-    reference_fonctionnelle = models.CharField(max_length=255)
+    reference_fonctionnelle = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     chemin_fichier = models.FileField(upload_to='documents/', max_length=500)
     hash_contenu = models.CharField(max_length=128, blank=True)
@@ -40,6 +50,24 @@ class Document(models.Model):
 
     def __str__(self) -> str:
         return f'{self.type_document} - {self.reference_fonctionnelle}'
+
+    @classmethod
+    def generate_reference_fonctionnelle(cls) -> str:
+        year = datetime.now().year
+        with transaction.atomic():
+            sequence_obj, _ = DocumentSequence.objects.select_for_update().get_or_create(
+                year=year,
+                defaults={'last_sequence': 0},
+            )
+            next_sequence = sequence_obj.last_sequence + 1
+            sequence_obj.last_sequence = next_sequence
+            sequence_obj.save(update_fields=['last_sequence'])
+        return f'DOC/NUM{next_sequence:04d}/{year}'
+
+    def save(self, *args, **kwargs):
+        if not self.reference_fonctionnelle:
+            self.reference_fonctionnelle = self.generate_reference_fonctionnelle()
+        super().save(*args, **kwargs)
 
 
 class SignatureNumerique(models.Model):
