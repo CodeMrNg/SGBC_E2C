@@ -28,6 +28,7 @@ class DocumentSequence(models.Model):
 class Document(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type_document = models.CharField(max_length=50)
+    code = models.PositiveIntegerField(unique=True, editable=False, null=True, blank=True)
     reference_fonctionnelle = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     chemin_fichier = models.FileField(upload_to='documents/', max_length=500)
@@ -59,7 +60,7 @@ class Document(models.Model):
         return 0
 
     @classmethod
-    def generate_reference_fonctionnelle(cls) -> str:
+    def _next_sequence(cls) -> int:
         year = cls._global_sequence_year()
         with transaction.atomic():
             sequence_obj, _ = DocumentSequence.objects.select_for_update().get_or_create(
@@ -69,10 +70,20 @@ class Document(models.Model):
             next_sequence = sequence_obj.last_sequence + 1
             sequence_obj.last_sequence = next_sequence
             sequence_obj.save(update_fields=['last_sequence'])
-        return f'DOC/NUM{next_sequence:06d}'
+        return next_sequence
+
+    @classmethod
+    def generate_reference_fonctionnelle(cls) -> str:
+        seq = cls._next_sequence()
+        return f'DOC/NUM{seq:06d}'
 
     def save(self, *args, **kwargs):
-        if not self.reference_fonctionnelle:
+        if not self.code:
+            seq = self._next_sequence()
+            self.code = seq
+            if not self.reference_fonctionnelle:
+                self.reference_fonctionnelle = f'DOC/NUM{seq:06d}'
+        elif not self.reference_fonctionnelle:
             self.reference_fonctionnelle = self.generate_reference_fonctionnelle()
         super().save(*args, **kwargs)
 
