@@ -546,7 +546,7 @@ class DemandeViewSet(AuditModelViewSet):
         departement_source = last_transfer.departement_beneficiaire if last_transfer else demande.id_departement
         with transaction.atomic():
             demande.id_departement = departement
-            demande.agent_traitant = ""
+            demande.agent_traitant = None
             demande.save(update_fields=['id_departement', 'agent_traitant'])
             Transfert.objects.create(
                 departement_source=departement_source,
