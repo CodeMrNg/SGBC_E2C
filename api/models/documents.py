@@ -51,9 +51,16 @@ class Document(models.Model):
     def __str__(self) -> str:
         return f'{self.type_document} - {self.reference_fonctionnelle}'
 
+    @staticmethod
+    def _global_sequence_year() -> int:
+        """
+        Utilise une seule séquence globale (pas de remise à zéro annuelle).
+        """
+        return 0
+
     @classmethod
     def generate_reference_fonctionnelle(cls) -> str:
-        year = datetime.now().year
+        year = cls._global_sequence_year()
         with transaction.atomic():
             sequence_obj, _ = DocumentSequence.objects.select_for_update().get_or_create(
                 year=year,
@@ -62,7 +69,7 @@ class Document(models.Model):
             next_sequence = sequence_obj.last_sequence + 1
             sequence_obj.last_sequence = next_sequence
             sequence_obj.save(update_fields=['last_sequence'])
-        return f'DOC/NUM{next_sequence:04d}/{year}'
+        return f'DOC/NUM{next_sequence:06d}'
 
     def save(self, *args, **kwargs):
         if not self.reference_fonctionnelle:

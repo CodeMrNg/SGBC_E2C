@@ -156,13 +156,20 @@ def build_history_response(viewset, type_objet: str, obj_id):
     for log in logs:
         user = getattr(log, 'id_utilisateur', None)
         departement = getattr(getattr(user, 'id_departement', None), 'nom', None)
+        raw_details = (log.details or '').strip()
+        action_label = {
+            'create': 'Création',
+            'update': 'Mise à jour',
+            'delete': 'Suppression',
+        }.get(log.action, f'Action {log.action}')
+        description = raw_details or action_label
         history.append(
             {
                 'nom': getattr(user, 'last_name', None) if user else None,
                 'prenom': getattr(user, 'first_name', None) if user else None,
                 'departement': departement,
                 'action': log.action,
-                'details': log.details,
+                'details': description,
                 'timestamp': log.timestamp,
             }
         )
