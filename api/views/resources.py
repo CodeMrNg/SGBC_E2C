@@ -144,28 +144,32 @@ def filter_bc_for_user(qs, user):
 
 def build_history_response(viewset, type_objet: str, obj_id):
     """
-    Rassemble l'historique d'actions et la liste des utilisateurs impliquÇ¸s
-    pour un objet donnÇ¸.
+    Rassemble l'historique d'actions pour un objet donnÇ¸ avec
+    des champs simples (nom, prÇ¸nom, dÇ¸partement, action, horodatage, dÇ¸tails).
     """
     logs = (
         AuditLog.objects.select_related('id_utilisateur')
         .filter(type_objet=type_objet, id_objet=obj_id)
         .order_by('-timestamp')
     )
-    serializer = AuditLogSerializer(logs, many=True, context=viewset.get_serializer_context())
-    seen = set()
-    users = []
+    history = []
     for log in logs:
         user = getattr(log, 'id_utilisateur', None)
-        uid = getattr(user, 'id', None)
-        if uid and uid not in seen:
-            seen.add(uid)
-            users.append(user)
-    users_data = UserSerializer(users, many=True, context=viewset.get_serializer_context()).data
+        departement = getattr(getattr(user, 'id_departement', None), 'nom', None)
+        history.append(
+            {
+                'nom': getattr(user, 'last_name', None) if user else None,
+                'prenom': getattr(user, 'first_name', None) if user else None,
+                'departement': departement,
+                'action': log.action,
+                'details': log.details,
+                'timestamp': log.timestamp,
+            }
+        )
     return Response(
         {
             'message': 'Historique rÇ¸cupÇ¸rÇ¸ avec succÇùs',
-            'data': {'historique': serializer.data, 'utilisateurs': users_data},
+            'data': {'historique': history},
         },
         status=status.HTTP_200_OK,
     )
