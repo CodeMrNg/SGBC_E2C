@@ -175,7 +175,7 @@ def build_history_response(viewset, type_objet: str, obj_id):
         )
     return Response(
         {
-            'message': 'Historique rÇ¸cupÇ¸rÇ¸ avec succÇùs',
+            'message': 'Historique récupéré avec succès',
             'data': {'historique': history},
         },
         status=status.HTTP_200_OK,
