@@ -12,6 +12,7 @@ from .mixins import AuditModelViewSet
 from ..auth_utils import log_audit
 from ..models import (
     Article,
+    AuditLog,
     Banque,
     BonCommande,
     Categorie,
@@ -37,6 +38,8 @@ from ..models.demandes import StatutDemande
 from ..models.documents import StatutArchivage
 from ..models.facturation_paiement import StatutFacture, StatutPaiement
 from ..models.transferts import StatutTransfert
+from ..serializers.audit import AuditLogSerializer
+from ..serializers.auth import UserSerializer
 from ..serializers.resources import (
     ArticleSerializer,
     BanqueSerializer,
@@ -137,6 +140,35 @@ def filter_bc_for_user(qs, user):
             return qs.filter(brouillon_filter | Q(id_departement_id=departement_id))
         return qs.filter(brouillon_filter)
     return filter_by_departement(qs, user, 'id_departement_id')
+
+
+def build_history_response(viewset, type_objet: str, obj_id):
+    """
+    Rassemble l'historique d'actions et la liste des utilisateurs impliquÇ¸s
+    pour un objet donnÇ¸.
+    """
+    logs = (
+        AuditLog.objects.select_related('id_utilisateur')
+        .filter(type_objet=type_objet, id_objet=obj_id)
+        .order_by('-timestamp')
+    )
+    serializer = AuditLogSerializer(logs, many=True, context=viewset.get_serializer_context())
+    seen = set()
+    users = []
+    for log in logs:
+        user = getattr(log, 'id_utilisateur', None)
+        uid = getattr(user, 'id', None)
+        if uid and uid not in seen:
+            seen.add(uid)
+            users.append(user)
+    users_data = UserSerializer(users, many=True, context=viewset.get_serializer_context()).data
+    return Response(
+        {
+            'message': 'Historique rÇ¸cupÇ¸rÇ¸ avec succÇùs',
+            'data': {'historique': serializer.data, 'utilisateurs': users_data},
+        },
+        status=status.HTTP_200_OK,
+    )
 
 
 class DeviseViewSet(AuditModelViewSet):
@@ -480,6 +512,11 @@ class DemandeViewSet(AuditModelViewSet):
             ).data,
         }
         return Response({'message': 'Statistiques des demandes', 'data': data}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='history')
+    def history(self, request, pk=None):
+        demande = self.get_object()
+        return build_history_response(self, self.audit_type, demande.id)
 
     @action(detail=True, methods=['post'], url_path='assign-agent')
     def assign_agent(self, request, pk=None):
@@ -834,6 +871,11 @@ class BonCommandeViewSet(AuditModelViewSet):
             ).data,
         }
         return Response({'message': 'Statistiques des bons de commande', 'data': data}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='history')
+    def history(self, request, pk=None):
+        bc = self.get_object()
+        return build_history_response(self, self.audit_type, bc.id)
 
     @action(detail=True, methods=['post'], url_path='assign-agent')
     def assign_agent(self, request, pk=None):
