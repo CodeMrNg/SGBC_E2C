@@ -611,7 +611,7 @@ class DemandeViewSet(AuditModelViewSet):
                 type_objet=self.audit_type,
                 id_objet=demande.id,
                 request=request,
-                details=f'Transfert vers le département {departement.id} | raison: {raison}',
+                details=f'Transfert vers le département {departement.nom} | raison: {raison}',
             )
 
         serializer = self.get_serializer(demande)
@@ -977,7 +977,7 @@ class BonCommandeViewSet(AuditModelViewSet):
                 id_objet=bc.id,
                 request=request,
                 details=(
-                    f'Transfert vers le département {departement.id}'
+                    f'Transfert vers le département {departement.nom}'
                     + (' avec mise à jour de la demande liée' if demande_updated else '')
                     + f' | raison: {raison}'
                 ),

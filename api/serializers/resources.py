@@ -180,6 +180,7 @@ class LigneBudgetaireSerializer(BaseDepthSerializer):
 
 class DocumentSerializer(BaseDepthSerializer):
     chemin_fichier = serializers.FileField(allow_empty_file=False)
+    titre = serializers.CharField(required=False, allow_blank=True)
     reference_fonctionnelle = serializers.CharField(required=False, allow_blank=True)
     code = serializers.IntegerField(read_only=True)
     id_utilisateur = UserSerializer(read_only=True)
@@ -209,6 +210,7 @@ class DocumentSerializer(BaseDepthSerializer):
         fields = (
             'id',
             'type_document',
+            'titre',
             'code',
             'reference_fonctionnelle',
             'description',

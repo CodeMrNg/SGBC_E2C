@@ -28,10 +28,11 @@ class DocumentSequence(models.Model):
 class Document(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type_document = models.CharField(max_length=50)
+    titre = models.CharField(max_length=255, blank=True)
     code = models.PositiveIntegerField(unique=True, editable=False, null=True, blank=True)
     reference_fonctionnelle = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
-    chemin_fichier = models.FileField(upload_to='documents/', max_length=500)
+    chemin_fichier = models.FileField(upload_to='documents/', max_length=500, blank=True, null=True)
     hash_contenu = models.CharField(max_length=128, blank=True)
     priorite = models.PositiveSmallIntegerField(
         choices=PrioriteDocument.choices,
