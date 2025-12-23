@@ -309,6 +309,7 @@ class DemandeSerializer(BaseDepthSerializer):
     )
     agent_traitant = UserSerializer(read_only=True)
     transferts = TransfertLiteSerializer(many=True, read_only=True)
+    agents_traitants = serializers.SerializerMethodField()
 
     class Meta(BaseDepthSerializer.Meta):
         model = Demande
@@ -329,6 +330,27 @@ class DemandeSerializer(BaseDepthSerializer):
         if self.instance is None and 'id_departement' not in attrs:
             raise serializers.ValidationError({'id_departement': 'Ce champ est requis.'})
         return attrs
+
+    def get_agents_traitants(self, obj):
+        """
+        Retourne la liste des utilisateurs ayant traitÇ¸ la demande
+        (agent courant + agents des transferts), sans doublons.
+        """
+        users = []
+        if getattr(obj, 'agent_traitant', None):
+            users.append(obj.agent_traitant)
+        transferts_users = getattr(obj, 'utilisateurs_transferts', None)
+        if transferts_users is not None:
+            users.extend(list(transferts_users.all()))
+
+        seen = set()
+        unique_users = []
+        for user in users:
+            uid = getattr(user, 'id', None)
+            if uid and uid not in seen:
+                seen.add(uid)
+                unique_users.append(user)
+        return UserSerializer(unique_users, many=True).data
 
     def get_bons_commande(self, obj):
         return BonCommandeSerializer(obj.bons_commande.all(), many=True, context=self.context).data
@@ -452,6 +474,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
     )
     id_ligne_budgetaire = LigneBudgetaireSerializer(read_only=True)
     transferts = TransfertLiteSerializer(many=True, read_only=True)
+    agents_traitants = serializers.SerializerMethodField()
 
     class Meta(BaseDepthSerializer.Meta):
         model = BonCommande
@@ -508,6 +531,30 @@ class BonCommandeSerializer(BaseDepthSerializer):
                         {'id_fournisseur': 'Ce fournisseur est deja associe a cette demande.'}
                     )
         return attrs
+
+    def get_agents_traitants(self, obj):
+        """
+        Retourne la liste des utilisateurs ayant traitÇ¸ le bon de commande
+        (agent courant + agents des transferts), sans doublons.
+        """
+        users = []
+        if getattr(obj, 'agent_traitant', None):
+            users.append(obj.agent_traitant)
+        transferts = getattr(obj, 'transferts', None)
+        if transferts is not None:
+            for transfert in transferts.all():
+                agent = getattr(transfert, 'agent', None)
+                if agent:
+                    users.append(agent)
+
+        seen = set()
+        unique_users = []
+        for user in users:
+            uid = getattr(user, 'id', None)
+            if uid and uid not in seen:
+                seen.add(uid)
+                unique_users.append(user)
+        return UserSerializer(unique_users, many=True).data
 
 
 class SignatureBCSerializer(BaseDepthSerializer):

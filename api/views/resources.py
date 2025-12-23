@@ -417,6 +417,7 @@ class DemandeViewSet(AuditModelViewSet):
         'lignes__id_article',
         'lignes__id_fournisseur',
         'documents',
+        'utilisateurs_transferts',
         models.Prefetch(
             'transferts',
             queryset=Transfert.objects.select_related(
@@ -546,7 +547,7 @@ class DemandeViewSet(AuditModelViewSet):
         departement_source = last_transfer.departement_beneficiaire if last_transfer else demande.id_departement
         with transaction.atomic():
             demande.id_departement = departement
-            demande.agent_traitant = None
+            demande.agent_traitant_id = None
             demande.save(update_fields=['id_departement', 'agent_traitant'])
             Transfert.objects.create(
                 departement_source=departement_source,
