@@ -41,25 +41,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # IMPORTANT: La clé secrète ne devrait JAMAIS être codée en dur dans le code source
 # Utilisez une variable d'environnement pour stocker cette clé de manière sécurisée
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'django-insecure-15enu260h^j+950*ifdzw+0myeh-v1xvu2lgcc@yg1+%$3u-m+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG doit être False en production pour éviter de divulguer des informations sensibles
 # Utilisez une variable d'environnement pour contrôler cette valeur
-DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
+DEBUG = True
 
     
 allowed_hosts_env = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,127.0.0.1:8000')
 _hosts = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
-ALLOWED_HOSTS = []
-for host in _hosts:
-    ALLOWED_HOSTS.append(host)
-    if ':' in host:
-        # Ajoute la partie sans port pour éviter les erreurs DisallowedHost
-        ALLOWED_HOSTS.append(host.split(':', 1)[0])
-for host in ('127.0.0.1', 'localhost', '0.0.0.0'):
-    if host not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append(host)
+ALLOWED_HOSTS = ['localhost,127.0.0.1', ' sgbc.pythonanywhere.com', 'www. sgbc.pythonanywhere.com', '127.0.0.1:8000']
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
