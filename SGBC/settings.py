@@ -48,9 +48,7 @@ SECRET_KEY = 'django-insecure-15enu260h^j+950*ifdzw+0myeh-v1xvu2lgcc@yg1+%$3u-m+
 # Utilisez une variable d'environnement pour contrôler cette valeur
 DEBUG = True
 
-    
-allowed_hosts_env = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,127.0.0.1:8000')
-_hosts = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
+
 ALLOWED_HOSTS = ['localhost,127.0.0.1', ' sgbc.pythonanywhere.com', 'www. sgbc.pythonanywhere.com', '127.0.0.1:8000']
 
 
