@@ -296,6 +296,7 @@ class DemandeSerializer(BaseDepthSerializer):
         write_only=True,
         required=False,
     )
+    canal = serializers.CharField(required=False, allow_blank=True)
     agent_traitant = UserSerializer(read_only=True)
     transferts = TransfertLiteSerializer(many=True, read_only=True)
     agents_traitants = serializers.SerializerMethodField()

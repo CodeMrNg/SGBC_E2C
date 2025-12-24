@@ -13,7 +13,7 @@ from .auth import (  # noqa: F401
     UserSerializer,
 )
 from .audit import AuditLogSerializer  # noqa: F401
-from .organisation import DepartementSerializer  # noqa: F401
+from .organisation import DepartementSerializer, SignatureUtilisateurSerializer  # noqa: F401
 from .user import UserManagementSerializer  # noqa: F401
 from .role import RoleSerializer  # noqa: F401
 from .resources import (  # noqa: F401

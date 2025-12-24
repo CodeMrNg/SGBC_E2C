@@ -216,3 +216,25 @@ class Utilisateur(AbstractUser, BaseModel):
     def __str__(self) -> str:
         full_name = self.get_full_name().strip()
         return full_name or self.login
+
+
+class SignatureUtilisateur(models.Model):
+    """
+    Signature et cachet associÇ¸s Çÿ un utilisateur.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    utilisateur = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='signature_utilisateur',
+    )
+    signature = models.FileField(upload_to='signatures/', null=True, blank=True)
+    cachet = models.FileField(upload_to='cachets/', null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'signature utilisateur'
+        verbose_name_plural = 'signatures utilisateurs'
+
+    def __str__(self) -> str:
+        return f'Signature de {self.utilisateur}'
