@@ -362,6 +362,23 @@ class DemandeReferenceSerializer(BaseDepthSerializer):
         )
 
 
+class SignatureBCDetailSerializer(serializers.ModelSerializer):
+    id_signataire = UserSerializer(read_only=True)
+    id_document_preuve = DocumentSerializer(read_only=True)
+
+    class Meta:
+        model = SignatureBC
+        fields = (
+            'id',
+            'id_signataire',
+            'niveau_validation',
+            'decision',
+            'commentaire',
+            'date_signature',
+            'id_document_preuve',
+        )
+
+
 class LigneBCSerializer(BaseDepthSerializer):
     id_article = ArticleSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
@@ -424,6 +441,7 @@ class LigneBCSerializer(BaseDepthSerializer):
 class BonCommandeSerializer(BaseDepthSerializer):
     lignes = LigneBCSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
+    signatures = SignatureBCDetailSerializer(many=True, read_only=True)
     id_demande = DemandeReferenceSerializer(read_only=True)
     id_demande_id = serializers.PrimaryKeyRelatedField(
         queryset=Demande.objects.all(),
@@ -469,6 +487,13 @@ class BonCommandeSerializer(BaseDepthSerializer):
     class Meta(BaseDepthSerializer.Meta):
         model = BonCommande
         read_only_fields = ('numero_bc',)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        view = self.context.get('view')
+        if not view or getattr(view, 'action', None) != 'retrieve':
+            data.pop('signatures', None)
+        return data
 
     def to_internal_value(self, data):
         data = dict(data)

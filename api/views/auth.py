@@ -15,7 +15,7 @@ from ..auth_utils import (
     issue_two_factor_code,
     log_audit,
 )
-from ..models import TwoFactorCode, TwoFactorMethod
+from ..models import SignatureUtilisateur, TwoFactorCode, TwoFactorMethod
 from ..serializers.auth import (
     ChangePasswordSerializer,
     LoginSerializer,
@@ -30,6 +30,19 @@ from ..serializers.auth import (
 
 User = get_user_model()
 password_reset_generator = PasswordResetTokenGenerator()
+
+
+def _build_signature_utilisateur_payload(user):
+    if not user:
+        return None
+    signature = SignatureUtilisateur.objects.filter(utilisateur=user).first()
+    if not signature:
+        return None
+    return {
+        'id': str(signature.id),
+        'signature': signature.signature.url if signature.signature else None,
+        'cachet': signature.cachet.url if signature.cachet else None,
+    }
 
 
 class LoginView(APIView):
@@ -64,6 +77,7 @@ class LoginView(APIView):
             {
                 **tokens,
                 'user': UserSerializer(user).data,
+                'signature_utilisateur': _build_signature_utilisateur_payload(user),
             },
             status=status.HTTP_200_OK,
         )
@@ -115,7 +129,13 @@ class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
+        return Response(
+            {
+                'user': UserSerializer(request.user).data,
+                'signature_utilisateur': _build_signature_utilisateur_payload(request.user),
+            },
+            status=status.HTTP_200_OK,
+        )
 
     def patch(self, request):
         serializer = UserProfileUpdateSerializer(
@@ -242,6 +262,8 @@ class TwoFactorVerifyView(APIView):
             {
                 **tokens,
                 'detail': 'A2F validée',
+                'user': UserSerializer(user).data,
+                'signature_utilisateur': _build_signature_utilisateur_payload(user),
             },
             status=status.HTTP_200_OK,
         )

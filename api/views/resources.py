@@ -815,6 +815,10 @@ class BonCommandeViewSet(AuditModelViewSet):
         'lignes__id_devise',
         'documents',
         models.Prefetch(
+            'signatures',
+            queryset=SignatureBC.objects.select_related('id_signataire', 'id_document_preuve'),
+        ),
+        models.Prefetch(
             'transferts',
             queryset=Transfert.objects.select_related(
                 'departement_source',
