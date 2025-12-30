@@ -23,6 +23,7 @@ from ..models import (
     TypeArticle,
     Utilisateur,
 )
+from ..models.bon_commande import DecisionSignature
 from .organisation import DepartementSerializer
 from .auth import UserSerializer
 
@@ -442,6 +443,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
     lignes = LigneBCSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
     signatures = SignatureBCDetailSerializer(many=True, read_only=True)
+    signataires = serializers.SerializerMethodField()
     id_demande = DemandeReferenceSerializer(read_only=True)
     id_demande_id = serializers.PrimaryKeyRelatedField(
         queryset=Demande.objects.all(),
@@ -493,7 +495,25 @@ class BonCommandeSerializer(BaseDepthSerializer):
         view = self.context.get('view')
         if not view or getattr(view, 'action', None) != 'retrieve':
             data.pop('signatures', None)
+            data.pop('signataires', None)
         return data
+
+    def get_signataires(self, obj):
+        signatures = getattr(obj, 'signatures', None)
+        if signatures is None:
+            signatures = obj.signatures.all()
+        users = []
+        seen = set()
+        for signature in signatures:
+            if signature.decision == DecisionSignature.EN_ATTENTE:
+                continue
+            user = signature.id_signataire
+            user_id = getattr(user, 'id', None)
+            if not user_id or user_id in seen:
+                continue
+            seen.add(user_id)
+            users.append(user)
+        return UserSerializer(users, many=True).data
 
     def to_internal_value(self, data):
         data = dict(data)

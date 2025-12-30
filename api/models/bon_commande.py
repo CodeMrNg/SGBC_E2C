@@ -17,7 +17,6 @@ class DecisionSignature(models.TextChoices):
     APPROUVE = ('approuve', 'Approuve')
     REFUSE = ('refuse', 'Refuse')
 
-
 class BonCommandeSequence(models.Model):
     year = models.PositiveIntegerField(primary_key=True)
     last_sequence = models.PositiveIntegerField(default=0)
