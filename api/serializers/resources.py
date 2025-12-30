@@ -502,6 +502,8 @@ class BonCommandeSerializer(BaseDepthSerializer):
         signatures = getattr(obj, 'signatures', None)
         if signatures is None:
             signatures = obj.signatures.all()
+        else:
+            signatures = signatures.all() if hasattr(signatures, 'all') else signatures
         users = []
         seen = set()
         for signature in signatures:
