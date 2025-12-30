@@ -18,12 +18,12 @@ from ..models import (
     MethodePaiement,
     Paiement,
     SignatureBC,
+    SignatureUtilisateur,
     SignatureNumerique,
     Transfert,
     TypeArticle,
     Utilisateur,
 )
-from ..models.bon_commande import DecisionSignature
 from .organisation import DepartementSerializer
 from .auth import UserSerializer
 
@@ -32,6 +32,20 @@ class BaseDepthSerializer(serializers.ModelSerializer):
     class Meta:
         depth = 1
         fields = '__all__'
+
+
+def _build_signature_utilisateur_payload(user):
+    if not user:
+        return None
+    try:
+        signature = user.signature_utilisateur
+    except SignatureUtilisateur.DoesNotExist:
+        return None
+    return {
+        'id': str(signature.id),
+        'signature': signature.signature.url if signature.signature else None,
+        'cachet': signature.cachet.url if signature.cachet else None,
+    }
 
 
 class DeviseSerializer(BaseDepthSerializer):
@@ -260,9 +274,13 @@ class SignatureNumeriqueSerializer(BaseDepthSerializer):
         write_only=True,
         required=False,
     )
+    signature_utilisateur = serializers.SerializerMethodField()
 
     class Meta(BaseDepthSerializer.Meta):
         model = SignatureNumerique
+
+    def get_signature_utilisateur(self, obj):
+        return _build_signature_utilisateur_payload(getattr(obj, 'id_utilisateur', None))
 
     def to_internal_value(self, data):
         data = dict(data)
@@ -400,6 +418,7 @@ class DemandeReferenceSerializer(BaseDepthSerializer):
 class SignatureBCDetailSerializer(serializers.ModelSerializer):
     id_signataire = UserSerializer(read_only=True)
     id_document_preuve = DocumentSerializer(read_only=True)
+    signature_utilisateur = serializers.SerializerMethodField()
 
     class Meta:
         model = SignatureBC
@@ -411,7 +430,11 @@ class SignatureBCDetailSerializer(serializers.ModelSerializer):
             'commentaire',
             'date_signature',
             'id_document_preuve',
+            'signature_utilisateur',
         )
+
+    def get_signature_utilisateur(self, obj):
+        return _build_signature_utilisateur_payload(getattr(obj, 'id_signataire', None))
 
 
 class LigneBCSerializer(BaseDepthSerializer):
@@ -477,7 +500,6 @@ class BonCommandeSerializer(BaseDepthSerializer):
     lignes = LigneBCSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
     signatures = SignatureBCDetailSerializer(many=True, read_only=True)
-    signataires = serializers.SerializerMethodField()
     id_demande = DemandeReferenceSerializer(read_only=True)
     id_demande_id = serializers.PrimaryKeyRelatedField(
         queryset=Demande.objects.all(),
@@ -529,27 +551,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
         view = self.context.get('view')
         if not view or getattr(view, 'action', None) != 'retrieve':
             data.pop('signatures', None)
-            data.pop('signataires', None)
         return data
-
-    def get_signataires(self, obj):
-        signatures = getattr(obj, 'signatures', None)
-        if signatures is None:
-            signatures = obj.signatures.all()
-        else:
-            signatures = signatures.all() if hasattr(signatures, 'all') else signatures
-        users = []
-        seen = set()
-        for signature in signatures:
-            if signature.decision == DecisionSignature.EN_ATTENTE:
-                continue
-            user = signature.id_signataire
-            user_id = getattr(user, 'id', None)
-            if not user_id or user_id in seen:
-                continue
-            seen.add(user_id)
-            users.append(user)
-        return UserSerializer(users, many=True).data
 
     def to_internal_value(self, data):
         data = dict(data)
@@ -648,9 +650,13 @@ class SignatureBCSerializer(BaseDepthSerializer):
         required=False,
         allow_null=True,
     )
+    signature_utilisateur = serializers.SerializerMethodField()
 
     class Meta(BaseDepthSerializer.Meta):
         model = SignatureBC
+
+    def get_signature_utilisateur(self, obj):
+        return _build_signature_utilisateur_payload(getattr(obj, 'id_signataire', None))
 
     def to_internal_value(self, data):
         data = dict(data)

@@ -101,8 +101,8 @@ class SignatureNumerique(models.Model):
         on_delete=models.PROTECT,
         related_name='signatures',
     )
-    certificat = models.TextField()
-    empreinte = models.CharField(max_length=128)
+    certificat = models.TextField(blank=True, null=True)
+    empreinte = models.CharField(max_length=128, blank=True, null=True)
     date_signature = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:

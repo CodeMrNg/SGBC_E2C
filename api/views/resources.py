@@ -724,7 +724,11 @@ class DocumentViewSet(AuditModelViewSet):
 
 
 class SignatureNumeriqueViewSet(AuditModelViewSet):
-    queryset = SignatureNumerique.objects.select_related('id_document', 'id_utilisateur').all()
+    queryset = SignatureNumerique.objects.select_related(
+        'id_document',
+        'id_utilisateur',
+        'id_utilisateur__signature_utilisateur',
+    ).all()
     serializer_class = SignatureNumeriqueSerializer
     audit_prefix = 'signature_numerique'
     audit_type = 'SIGNATURE_NUMERIQUE'
@@ -1116,7 +1120,12 @@ class LigneBCViewSet(AuditModelViewSet):
 
 
 class SignatureBCViewSet(AuditModelViewSet):
-    queryset = SignatureBC.objects.select_related('id_bc', 'id_signataire', 'id_document_preuve').all()
+    queryset = SignatureBC.objects.select_related(
+        'id_bc',
+        'id_signataire',
+        'id_signataire__signature_utilisateur',
+        'id_document_preuve',
+    ).all()
     serializer_class = SignatureBCSerializer
     audit_prefix = 'signature_bc'
     audit_type = 'SIGNATURE_BC'
