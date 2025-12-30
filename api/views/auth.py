@@ -77,7 +77,7 @@ class LoginView(APIView):
             {
                 **tokens,
                 'user': UserSerializer(user).data,
-                'signature_utilisateur': _build_signature_utilisateur_payload(user),
+                #'signature_utilisateur': _build_signature_utilisateur_payload(user),
             },
             status=status.HTTP_200_OK,
         )
@@ -132,7 +132,7 @@ class MeView(APIView):
         return Response(
             {
                 'user': UserSerializer(request.user).data,
-                'signature_utilisateur': _build_signature_utilisateur_payload(request.user),
+                #'signature_utilisateur': _build_signature_utilisateur_payload(request.user),
             },
             status=status.HTTP_200_OK,
         )
