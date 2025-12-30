@@ -248,8 +248,43 @@ class DocumentSerializer(BaseDepthSerializer):
 
 
 class SignatureNumeriqueSerializer(BaseDepthSerializer):
+    id_document_id = serializers.PrimaryKeyRelatedField(
+        queryset=Document.objects.all(),
+        source='id_document',
+        write_only=True,
+        required=False,
+    )
+    id_utilisateur_id = serializers.PrimaryKeyRelatedField(
+        queryset=Utilisateur.objects.all(),
+        source='id_utilisateur',
+        write_only=True,
+        required=False,
+    )
+
     class Meta(BaseDepthSerializer.Meta):
         model = SignatureNumerique
+
+    def to_internal_value(self, data):
+        data = dict(data)
+        if 'id_document' in data and 'id_document_id' not in data:
+            data['id_document_id'] = data.pop('id_document')
+        elif 'document_id' in data and 'id_document_id' not in data:
+            data['id_document_id'] = data.pop('document_id')
+        if 'id_utilisateur' in data and 'id_utilisateur_id' not in data:
+            data['id_utilisateur_id'] = data.pop('id_utilisateur')
+        elif 'user_id' in data and 'id_utilisateur_id' not in data:
+            data['id_utilisateur_id'] = data.pop('user_id')
+        return super().to_internal_value(data)
+
+    def validate(self, attrs):
+        if self.instance is None and 'id_document' not in attrs:
+            raise serializers.ValidationError({'id_document': 'Document requis.'})
+        if self.instance is None and 'id_utilisateur' not in attrs:
+            user = getattr(self.context.get('request'), 'user', None)
+            if user is None or not getattr(user, 'id', None):
+                raise serializers.ValidationError({'id_utilisateur': 'Utilisateur requis.'})
+            attrs['id_utilisateur'] = user
+        return attrs
 
 
 class TransfertLiteSerializer(serializers.ModelSerializer):
@@ -594,8 +629,56 @@ class BonCommandeSerializer(BaseDepthSerializer):
 
 
 class SignatureBCSerializer(BaseDepthSerializer):
+    id_bc_id = serializers.PrimaryKeyRelatedField(
+        queryset=BonCommande.objects.all(),
+        source='id_bc',
+        write_only=True,
+        required=False,
+    )
+    id_signataire_id = serializers.PrimaryKeyRelatedField(
+        queryset=Utilisateur.objects.all(),
+        source='id_signataire',
+        write_only=True,
+        required=False,
+    )
+    id_document_preuve_id = serializers.PrimaryKeyRelatedField(
+        queryset=Document.objects.all(),
+        source='id_document_preuve',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
     class Meta(BaseDepthSerializer.Meta):
         model = SignatureBC
+
+    def to_internal_value(self, data):
+        data = dict(data)
+        if 'id_bc' in data and 'id_bc_id' not in data:
+            data['id_bc_id'] = data.pop('id_bc')
+        elif 'bc_id' in data and 'id_bc_id' not in data:
+            data['id_bc_id'] = data.pop('bc_id')
+        if 'id_signataire' in data and 'id_signataire_id' not in data:
+            data['id_signataire_id'] = data.pop('id_signataire')
+        elif 'signataire_id' in data and 'id_signataire_id' not in data:
+            data['id_signataire_id'] = data.pop('signataire_id')
+        elif 'user_id' in data and 'id_signataire_id' not in data:
+            data['id_signataire_id'] = data.pop('user_id')
+        if 'id_document_preuve' in data and 'id_document_preuve_id' not in data:
+            data['id_document_preuve_id'] = data.pop('id_document_preuve')
+        elif 'document_preuve_id' in data and 'id_document_preuve_id' not in data:
+            data['id_document_preuve_id'] = data.pop('document_preuve_id')
+        return super().to_internal_value(data)
+
+    def validate(self, attrs):
+        if self.instance is None and 'id_bc' not in attrs:
+            raise serializers.ValidationError({'id_bc': 'Bon de commande requis.'})
+        if self.instance is None and 'id_signataire' not in attrs:
+            user = getattr(self.context.get('request'), 'user', None)
+            if user is None or not getattr(user, 'id', None):
+                raise serializers.ValidationError({'id_signataire': 'Signataire requis.'})
+            attrs['id_signataire'] = user
+        return attrs
 
 
 class FactureSerializer(BaseDepthSerializer):
