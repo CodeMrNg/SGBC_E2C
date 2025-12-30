@@ -1556,7 +1556,7 @@
             "url": "{{base_url}}/fournisseurs-rib/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"id_banque\": \"{{banque_id}}\",\n  \"intitule_compte\": \"Compte A\",\n  \"numero_compte\": \"123456789\",\n  \"code_banque\": \"001\",\n  \"code_agence\": \"0001\",\n  \"cle_rib\": \"12\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"actif\": true\n}"
+              "raw": "{\n  \"id_banque\": \"{{banque_id}}\",\n  \"intitule_compte\": \"Compte A\",\n  \"numero_compte\": \"123456789\",\n  \"code_banque\": \"001\",\n  \"code_agence\": \"0001\",\n  \"cle_rib\": \"12\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"actif\": true\n}"
             }
           }
         },
@@ -1590,7 +1590,7 @@
             "url": "{{base_url}}/fournisseurs-rib/{{rib_id}}/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"id_banque\": \"{{banque_id}}\",\n  \"intitule_compte\": \"Compte A\",\n  \"numero_compte\": \"123456789\",\n  \"code_banque\": \"001\",\n  \"code_agence\": \"0001\",\n  \"cle_rib\": \"12\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"actif\": true\n}"
+              "raw": "{\n  \"id_banque\": \"{{banque_id}}\",\n  \"intitule_compte\": \"Compte A\",\n  \"numero_compte\": \"123456789\",\n  \"code_banque\": \"001\",\n  \"code_agence\": \"0001\",\n  \"cle_rib\": \"12\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"actif\": true\n}"
             }
           }
         },
@@ -1700,7 +1700,7 @@
             "url": "{{base_url}}/demandes/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"source\": \"email\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
+              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"source\": \"email\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
             }
           }
         },
@@ -1734,7 +1734,7 @@
             "url": "{{base_url}}/demandes/{{demande_id}}/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"source\": \"email\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
+              "raw": "{\n  \"numero_demande\": \"DM001\",\n  \"objet\": \"Achat PC\",\n  \"description\": \"\",\n  \"source\": \"email\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"statut_demande\": \"en_attente\"\n}"
             }
           }
         },
@@ -1843,7 +1843,7 @@
             "url": "{{base_url}}/lignes-demande/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_article\": \"{{article_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"designation\": \"PC\",\n  \"quantite\": \"2\",\n  \"prix_unitaire_estime\": \"900\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"commentaire\": \"\"\n}"
+              "raw": "{\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_article\": \"{{article_id}}\",\n  \"designation\": \"PC\",\n  \"quantite\": \"2\",\n  \"prix_unitaire_estime\": \"900\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"commentaire\": \"\"\n}"
             }
           }
         },
@@ -1877,7 +1877,7 @@
             "url": "{{base_url}}/lignes-demande/{{ligne_demande_id}}/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_article\": \"{{article_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"designation\": \"PC\",\n  \"quantite\": \"2\",\n  \"prix_unitaire_estime\": \"900\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"commentaire\": \"\"\n}"
+              "raw": "{\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_article\": \"{{article_id}}\",\n  \"designation\": \"PC\",\n  \"quantite\": \"2\",\n  \"prix_unitaire_estime\": \"900\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"commentaire\": \"\"\n}"
             }
           }
         },
@@ -2287,7 +2287,7 @@
             "url": "{{base_url}}/bons-commande/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero_bc\": \"BC001\",\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_demande_valider\": \"{{user_id}}\",\n  \"tva\": \"19\",\n  \"remise\": \"0\",\n  \"ca\": \"CA\",\n  \"id_methode_paiement\": \"{{methode_id}}\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_engage\": \"2000\",\n  \"id_ligne_budgetaire\": \"{{ligne_budget_id}}\",\n  \"type_achat\": \"IT\",\n  \"statut_bc\": \"en_redaction\",\n  \"id_redacteur\": \"{{user_id}}\"\n}"
+              "raw": "{\n  \"numero_bc\": \"BC001\",\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_demande_valider\": \"{{user_id}}\",\n  \"tva\": \"19\",\n  \"remise\": \"0\",\n  \"ca\": \"CA\",\n  \"id_methode_paiement\": \"{{methode_id}}\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_engage\": \"2000\",\n  \"id_ligne_budgetaire\": \"{{ligne_budget_id}}\",\n  \"type_achat\": \"IT\",\n  \"statut_bc\": \"en_redaction\",\n  \"id_redacteur\": \"{{user_id}}\"\n}"
             }
           }
         },
@@ -2321,7 +2321,7 @@
             "url": "{{base_url}}/bons-commande/{{bc_id}}/",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"numero_bc\": \"BC001\",\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_fournisseur\": \"{{fournisseur_id}}\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_demande_valider\": \"{{user_id}}\",\n  \"tva\": \"19\",\n  \"remise\": \"0\",\n  \"ca\": \"CA\",\n  \"id_methode_paiement\": \"{{methode_id}}\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_engage\": \"2000\",\n  \"id_ligne_budgetaire\": \"{{ligne_budget_id}}\",\n  \"type_achat\": \"IT\",\n  \"statut_bc\": \"en_redaction\",\n  \"id_redacteur\": \"{{user_id}}\"\n}"
+              "raw": "{\n  \"numero_bc\": \"BC001\",\n  \"id_demande\": \"{{demande_id}}\",\n  \"id_departement\": \"{{departement_id}}\",\n  \"id_demande_valider\": \"{{user_id}}\",\n  \"tva\": \"19\",\n  \"remise\": \"0\",\n  \"ca\": \"CA\",\n  \"id_methode_paiement\": \"{{methode_id}}\",\n  \"id_devise\": \"{{devise_id}}\",\n  \"montant_engage\": \"2000\",\n  \"id_ligne_budgetaire\": \"{{ligne_budget_id}}\",\n  \"type_achat\": \"IT\",\n  \"statut_bc\": \"en_redaction\",\n  \"id_redacteur\": \"{{user_id}}\"\n}"
             }
           }
         },

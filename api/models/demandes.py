@@ -35,6 +35,13 @@ class Demande(models.Model):
         on_delete=models.PROTECT,
         related_name='demandes',
     )
+    id_fournisseur = models.ForeignKey(
+        'Fournisseur',
+        on_delete=models.SET_NULL,
+        related_name='demandes',
+        null=True,
+        blank=True,
+    )
     agent_traitant = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -95,13 +102,6 @@ class LigneDemande(models.Model):
         'Article',
         on_delete=models.SET_NULL,
         related_name='lignes_demande',
-        null=True,
-        blank=True,
-    )
-    id_fournisseur = models.ForeignKey(
-        'Fournisseur',
-        on_delete=models.SET_NULL,
-        related_name='lignes_proposees',
         null=True,
         blank=True,
     )

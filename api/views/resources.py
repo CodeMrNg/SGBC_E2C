@@ -352,9 +352,9 @@ class FournisseurViewSet(AuditModelViewSet):
     def associations(self, request, pk=None):
         fournisseur = self.get_object()
         demandes_qs = (
-            Demande.objects.select_related('id_departement', 'agent_traitant')
-            .prefetch_related('lignes__id_article', 'lignes__id_fournisseur', 'documents')
-            .filter(lignes__id_fournisseur=fournisseur)
+            Demande.objects.select_related('id_departement', 'agent_traitant', 'id_fournisseur')
+            .prefetch_related('lignes__id_article', 'documents')
+            .filter(id_fournisseur=fournisseur)
             .distinct()
             .order_by('-date_creation')
         )
@@ -451,9 +451,8 @@ class FournisseurRIBViewSet(AuditModelViewSet):
 
 
 class DemandeViewSet(AuditModelViewSet):
-    queryset = Demande.objects.select_related('id_departement', 'agent_traitant').prefetch_related(
+    queryset = Demande.objects.select_related('id_departement', 'agent_traitant', 'id_fournisseur').prefetch_related(
         'lignes__id_article',
-        'lignes__id_fournisseur',
         'documents',
         'utilisateurs_transferts',
         models.Prefetch(
@@ -474,6 +473,7 @@ class DemandeViewSet(AuditModelViewSet):
         numero = self.request.GET.get('numero')
         statut = self.request.GET.get('statut')
         departement = self.request.GET.get('departement_id')
+        fournisseur = self.request.GET.get('fournisseur_id')
         search = self.request.GET.get('search')
         date_debut = self.request.GET.get('date_debut') or self.request.GET.get('date_from')
         date_fin = self.request.GET.get('date_fin') or self.request.GET.get('date_to')
@@ -488,6 +488,8 @@ class DemandeViewSet(AuditModelViewSet):
             qs = qs.filter(statut_demande=statut_normalise)
         if departement:
             qs = qs.filter(id_departement_id=departement)
+        if fournisseur:
+            qs = qs.filter(id_fournisseur_id=fournisseur)
         if date_debut:
             parsed = parse_date(date_debut)
             if parsed:
@@ -617,7 +619,7 @@ class DemandeViewSet(AuditModelViewSet):
 
 
 class LigneDemandeViewSet(AuditModelViewSet):
-    queryset = LigneDemande.objects.select_related('id_demande', 'id_article', 'id_fournisseur').all()
+    queryset = LigneDemande.objects.select_related('id_demande', 'id_article').all()
     serializer_class = LigneDemandeSerializer
     audit_prefix = 'ligne_demande'
     audit_type = 'LIGNE_DEMANDE'
@@ -626,13 +628,10 @@ class LigneDemandeViewSet(AuditModelViewSet):
         qs = super().get_queryset()
         demande = self.request.GET.get('demande_id')
         article = self.request.GET.get('article_id')
-        fournisseur = self.request.GET.get('fournisseur_id')
         if demande:
             qs = qs.filter(id_demande_id=demande)
         if article:
             qs = qs.filter(id_article_id=article)
-        if fournisseur:
-            qs = qs.filter(id_fournisseur_id=fournisseur)
         return filter_by_departement(qs, self.request.user, 'id_demande__id_departement_id')
 
     @action(detail=False, methods=['get'], url_path='stats')
@@ -996,7 +995,7 @@ class DashboardView(APIView):
 
     def get(self, request, format=None):
         user = request.user
-        demandes_qs = Demande.objects.select_related('id_departement').prefetch_related('lignes', 'documents')
+        demandes_qs = Demande.objects.select_related('id_departement', 'id_fournisseur').prefetch_related('lignes', 'documents')
         bc_qs = BonCommande.objects.select_related(
             'id_demande',
             'id_fournisseur',

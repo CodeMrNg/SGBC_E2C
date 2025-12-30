@@ -315,6 +315,7 @@ class DemandeAdmin(admin.ModelAdmin):
         'objet',
         'source',
         'rapport_daa',
+        'id_fournisseur',
         'id_departement',
         'statut_demande',
         'date_creation',
@@ -322,13 +323,13 @@ class DemandeAdmin(admin.ModelAdmin):
         'date_validation_budget',
     )
     search_fields = ('numero_demande', 'objet', 'description', 'source', 'rapport_daa')
-    list_filter = ('statut_demande', 'id_departement', 'date_creation', 'date_modification')
+    list_filter = ('statut_demande', 'id_departement', 'id_fournisseur', 'date_creation', 'date_modification')
     readonly_fields = ('numero_demande',)
 
 
 @admin.register(LigneDemande)
 class LigneDemandeAdmin(admin.ModelAdmin):
-    list_display = ('id_demande', 'designation', 'id_article', 'id_fournisseur', 'quantite', 'prix_unitaire_estime')
+    list_display = ('id_demande', 'designation', 'id_article', 'quantite', 'prix_unitaire_estime')
     search_fields = ('designation', 'id_demande__numero_demande')
     list_filter = ('id_demande', 'id_article')
 

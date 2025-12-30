@@ -312,6 +312,7 @@ class Command(BaseCommand):
                 "description": "Renouvellement des laptops",
                 "source": "Interne",
                 "id_departement": dep_map["DAA"],
+                "id_fournisseur": fournisseur_map["F001"],
             },
         )[0]
 
@@ -320,7 +321,6 @@ class Command(BaseCommand):
             designation="Laptop 15 pouces",
             defaults={
                 "id_article": article_laptop,
-                "id_fournisseur": fournisseur_map["F001"],
                 "quantite": Decimal("10"),
                 "prix_unitaire_estime": Decimal("350000"),
                 "id_devise": devise_map["XAF"],
@@ -336,6 +336,7 @@ class Command(BaseCommand):
                 "description": "Contrat de maintenance serveurs",
                 "source": "Interne",
                 "id_departement": dep_map["DSI"],
+                "id_fournisseur": fournisseur_map["F002"],
                 "statut_demande": "en_traitement",
             },
         )[0]
@@ -345,7 +346,6 @@ class Command(BaseCommand):
             designation="Maintenance serveurs",
             defaults={
                 "id_article": article_service,
-                "id_fournisseur": fournisseur_map["F002"],
                 "quantite": Decimal("1"),
                 "prix_unitaire_estime": Decimal("500000"),
                 "id_devise": devise_map["XAF"],
@@ -361,6 +361,7 @@ class Command(BaseCommand):
                 "description": "Révision annuelle des véhicules",
                 "source": "Interne",
                 "id_departement": dep_map["DPT"],
+                "id_fournisseur": fournisseur_map["F003"],
                 "statut_demande": "en_attente",
             },
         )[0]
@@ -370,7 +371,6 @@ class Command(BaseCommand):
             designation="Révision 10 véhicules",
             defaults={
                 "id_article": article_service,
-                "id_fournisseur": fournisseur_map["F003"],
                 "quantite": Decimal("10"),
                 "prix_unitaire_estime": Decimal("150000"),
                 "id_devise": devise_map["XAF"],

@@ -85,7 +85,6 @@ class FournisseurRIBSerializer(BaseDepthSerializer):
 
 class LigneDemandeSerializer(BaseDepthSerializer):
     id_article = ArticleSerializer(read_only=True)
-    id_fournisseur = FournisseurSerializer(read_only=True)
     id_devise = DeviseSerializer(read_only=True)
     id_demande_id = serializers.PrimaryKeyRelatedField(
         queryset=Demande.objects.all(),
@@ -96,13 +95,6 @@ class LigneDemandeSerializer(BaseDepthSerializer):
     id_article_id = serializers.PrimaryKeyRelatedField(
         queryset=Article.objects.all(),
         source='id_article',
-        write_only=True,
-        required=False,
-        allow_null=True,
-    )
-    id_fournisseur_id = serializers.PrimaryKeyRelatedField(
-        queryset=Fournisseur.objects.all(),
-        source='id_fournisseur',
         write_only=True,
         required=False,
         allow_null=True,
@@ -140,14 +132,6 @@ class LigneDemandeSerializer(BaseDepthSerializer):
                     attrs['id_article'] = Article.objects.get(pk=article_id)
                 except Article.DoesNotExist:
                     raise serializers.ValidationError({'id_article': 'Article introuvable.'})
-
-        if 'id_fournisseur' not in attrs and 'id_fournisseur_id' not in self.initial_data:
-            fournisseur_id = self.initial_data.get('id_fournisseur')
-            if fournisseur_id:
-                try:
-                    attrs['id_fournisseur'] = Fournisseur.objects.get(pk=fournisseur_id)
-                except Fournisseur.DoesNotExist:
-                    raise serializers.ValidationError({'id_fournisseur': 'Fournisseur introuvable.'})
 
         if 'id_devise' not in attrs and 'id_devise_id' not in self.initial_data:
             devise_id = self.initial_data.get('id_devise')
@@ -297,6 +281,14 @@ class DemandeSerializer(BaseDepthSerializer):
         write_only=True,
         required=False,
     )
+    id_fournisseur = FournisseurSerializer(read_only=True)
+    id_fournisseur_id = serializers.PrimaryKeyRelatedField(
+        queryset=Fournisseur.objects.all(),
+        source='id_fournisseur',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
     canal = serializers.CharField(required=False, allow_blank=True)
     agent_traitant = UserSerializer(read_only=True)
     transferts = TransfertLiteSerializer(many=True, read_only=True)
@@ -318,6 +310,13 @@ class DemandeSerializer(BaseDepthSerializer):
                     attrs['id_departement'] = Departement.objects.get(pk=departement_id)
                 except Departement.DoesNotExist:
                     raise serializers.ValidationError({'id_departement': 'Département introuvable.'})
+        if 'id_fournisseur' not in attrs:
+            fournisseur_id = self.initial_data.get('id_fournisseur') or self.initial_data.get('fournisseur_id')
+            if fournisseur_id:
+                try:
+                    attrs['id_fournisseur'] = Fournisseur.objects.get(pk=fournisseur_id)
+                except Fournisseur.DoesNotExist:
+                    raise serializers.ValidationError({'id_fournisseur': 'Fournisseur introuvable.'})
         if self.instance is None and 'id_departement' not in attrs:
             raise serializers.ValidationError({'id_departement': 'Ce champ est requis.'})
         return attrs
