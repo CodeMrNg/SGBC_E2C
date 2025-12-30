@@ -549,7 +549,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         view = self.context.get('view')
-        if not view or getattr(view, 'action', None) != 'retrieve':
+        if not view or getattr(view, 'action', None) not in {'retrieve', 'list'}:
             data.pop('signatures', None)
         return data
 
