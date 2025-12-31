@@ -194,9 +194,7 @@ class LigneBC(models.Model):
         blank=True,
     )
     ca = models.CharField(max_length=50, blank=True)
-    prix_net = models.DecimalField(
-        max_digits=18,
-        decimal_places=2,
+    prix_net = models.FloatField(
         null=True,
         blank=True,
     )
