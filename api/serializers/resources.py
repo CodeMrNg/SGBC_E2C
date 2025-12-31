@@ -612,6 +612,20 @@ class BonCommandeSerializer(BaseDepthSerializer):
                 if user is None or not getattr(user, 'id', None):
                     raise serializers.ValidationError({'id_redacteur': 'Rédacteur requis.'})
                 attrs['id_redacteur'] = user
+        demande = attrs.get('id_demande') or getattr(self.instance, 'id_demande', None)
+        fournisseur = attrs.get('id_fournisseur') or getattr(self.instance, 'id_fournisseur', None)
+        if demande and fournisseur:
+            if self.instance is None or (
+                demande != getattr(self.instance, 'id_demande', None)
+                or fournisseur != getattr(self.instance, 'id_fournisseur', None)
+            ):
+                exists = BonCommande.objects.filter(id_demande=demande, id_fournisseur=fournisseur)
+                if self.instance:
+                    exists = exists.exclude(pk=self.instance.pk)
+                if exists.exists():
+                    raise serializers.ValidationError(
+                        {'id_fournisseur': 'Ce fournisseur a déjà un bon de commande sur cette demande.'}
+                    )
         return attrs
 
     def get_agents_traitants(self, obj):
