@@ -181,8 +181,44 @@ class LigneDemandeSerializer(BaseDepthSerializer):
 
 
 class LigneBudgetaireSerializer(BaseDepthSerializer):
+    id_departement = DepartementSerializer(read_only=True)
+    id_departement_id = serializers.PrimaryKeyRelatedField(
+        queryset=Departement.objects.all(),
+        source='id_departement',
+        write_only=True,
+        required=False,
+    )
+    id_devise = DeviseSerializer(read_only=True)
+    id_devise_id = serializers.PrimaryKeyRelatedField(
+        queryset=Devise.objects.all(),
+        source='id_devise',
+        write_only=True,
+        required=False,
+    )
+
     class Meta(BaseDepthSerializer.Meta):
         model = LigneBudgetaire
+
+    def validate(self, attrs):
+        if 'id_departement' not in attrs:
+            departement_id = self.initial_data.get('id_departement') or self.initial_data.get('departement_id')
+            if departement_id:
+                try:
+                    attrs['id_departement'] = Departement.objects.get(pk=departement_id)
+                except Departement.DoesNotExist:
+                    raise serializers.ValidationError({'id_departement': 'Departement introuvable.'})
+        if 'id_devise' not in attrs:
+            devise_id = self.initial_data.get('id_devise') or self.initial_data.get('devise_id')
+            if devise_id:
+                try:
+                    attrs['id_devise'] = Devise.objects.get(pk=devise_id)
+                except Devise.DoesNotExist:
+                    raise serializers.ValidationError({'id_devise': 'Devise introuvable.'})
+        if self.instance is None and 'id_departement' not in attrs:
+            raise serializers.ValidationError({'id_departement': 'Ce champ est requis.'})
+        if self.instance is None and 'id_devise' not in attrs:
+            raise serializers.ValidationError({'id_devise': 'Ce champ est requis.'})
+        return attrs
 
 
 class DocumentSerializer(BaseDepthSerializer):
