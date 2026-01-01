@@ -775,13 +775,177 @@ class SignatureBCSerializer(BaseDepthSerializer):
 
 
 class FactureSerializer(BaseDepthSerializer):
+    id_bc = BonCommandeSerializer(read_only=True)
+    id_bc_id = serializers.PrimaryKeyRelatedField(
+        queryset=BonCommande.objects.all(),
+        source='id_bc',
+        write_only=True,
+        required=False,
+    )
+    id_devise = DeviseSerializer(read_only=True)
+    id_devise_id = serializers.PrimaryKeyRelatedField(
+        queryset=Devise.objects.all(),
+        source='id_devise',
+        write_only=True,
+        required=False,
+    )
+    id_document_facture = DocumentSerializer(read_only=True)
+    id_document_facture_id = serializers.PrimaryKeyRelatedField(
+        queryset=Document.objects.all(),
+        source='id_document_facture',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    id_agent_comptable = UserSerializer(read_only=True)
+    id_agent_comptable_id = serializers.PrimaryKeyRelatedField(
+        queryset=Utilisateur.objects.all(),
+        source='id_agent_comptable',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
     class Meta(BaseDepthSerializer.Meta):
         model = Facture
 
+    def to_internal_value(self, data):
+        data = dict(data)
+        if 'bc_id' in data and 'id_bc_id' not in data:
+            data['id_bc_id'] = data.pop('bc_id')
+        elif 'id_bc' in data and 'id_bc_id' not in data:
+            data['id_bc_id'] = data.pop('id_bc')
+        if 'devise_id' in data and 'id_devise_id' not in data:
+            data['id_devise_id'] = data.pop('devise_id')
+        elif 'id_devise' in data and 'id_devise_id' not in data:
+            data['id_devise_id'] = data.pop('id_devise')
+        if 'document_facture_id' in data and 'id_document_facture_id' not in data:
+            data['id_document_facture_id'] = data.pop('document_facture_id')
+        elif 'id_document_facture' in data and 'id_document_facture_id' not in data:
+            data['id_document_facture_id'] = data.pop('id_document_facture')
+        if 'agent_comptable_id' in data and 'id_agent_comptable_id' not in data:
+            data['id_agent_comptable_id'] = data.pop('agent_comptable_id')
+        elif 'id_agent_comptable' in data and 'id_agent_comptable_id' not in data:
+            data['id_agent_comptable_id'] = data.pop('id_agent_comptable')
+        return super().to_internal_value(data)
+
+    def validate(self, attrs):
+        if 'id_bc' not in attrs:
+            bc_id = self.initial_data.get('id_bc') or self.initial_data.get('bc_id')
+            if bc_id:
+                try:
+                    attrs['id_bc'] = BonCommande.objects.get(pk=bc_id)
+                except BonCommande.DoesNotExist:
+                    raise serializers.ValidationError({'id_bc': 'Bon de commande introuvable.'})
+        if 'id_devise' not in attrs:
+            devise_id = self.initial_data.get('id_devise') or self.initial_data.get('devise_id')
+            if devise_id:
+                try:
+                    attrs['id_devise'] = Devise.objects.get(pk=devise_id)
+                except Devise.DoesNotExist:
+                    raise serializers.ValidationError({'id_devise': 'Devise introuvable.'})
+        if self.instance is None and 'id_bc' not in attrs:
+            raise serializers.ValidationError({'id_bc': 'Ce champ est requis.'})
+        if self.instance is None and 'id_devise' not in attrs:
+            raise serializers.ValidationError({'id_devise': 'Ce champ est requis.'})
+        return attrs
+
 
 class PaiementSerializer(BaseDepthSerializer):
+    id_facture = FactureSerializer(read_only=True)
+    id_facture_id = serializers.PrimaryKeyRelatedField(
+        queryset=Facture.objects.all(),
+        source='id_facture',
+        write_only=True,
+        required=False,
+    )
+    id_banque = BanqueSerializer(read_only=True)
+    id_banque_id = serializers.PrimaryKeyRelatedField(
+        queryset=Banque.objects.all(),
+        source='id_banque',
+        write_only=True,
+        required=False,
+    )
+    id_methode_paiement = MethodePaiementSerializer(read_only=True)
+    id_methode_paiement_id = serializers.PrimaryKeyRelatedField(
+        queryset=MethodePaiement.objects.all(),
+        source='id_methode_paiement',
+        write_only=True,
+        required=False,
+    )
+    id_preuve_paiement = DocumentSerializer(read_only=True)
+    id_preuve_paiement_id = serializers.PrimaryKeyRelatedField(
+        queryset=Document.objects.all(),
+        source='id_preuve_paiement',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    id_tresorier = UserSerializer(read_only=True)
+    id_tresorier_id = serializers.PrimaryKeyRelatedField(
+        queryset=Utilisateur.objects.all(),
+        source='id_tresorier',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
     class Meta(BaseDepthSerializer.Meta):
         model = Paiement
+
+    def to_internal_value(self, data):
+        data = dict(data)
+        if 'facture_id' in data and 'id_facture_id' not in data:
+            data['id_facture_id'] = data.pop('facture_id')
+        elif 'id_facture' in data and 'id_facture_id' not in data:
+            data['id_facture_id'] = data.pop('id_facture')
+        if 'banque_id' in data and 'id_banque_id' not in data:
+            data['id_banque_id'] = data.pop('banque_id')
+        elif 'id_banque' in data and 'id_banque_id' not in data:
+            data['id_banque_id'] = data.pop('id_banque')
+        if 'methode_paiement_id' in data and 'id_methode_paiement_id' not in data:
+            data['id_methode_paiement_id'] = data.pop('methode_paiement_id')
+        elif 'id_methode_paiement' in data and 'id_methode_paiement_id' not in data:
+            data['id_methode_paiement_id'] = data.pop('id_methode_paiement')
+        if 'preuve_paiement_id' in data and 'id_preuve_paiement_id' not in data:
+            data['id_preuve_paiement_id'] = data.pop('preuve_paiement_id')
+        elif 'id_preuve_paiement' in data and 'id_preuve_paiement_id' not in data:
+            data['id_preuve_paiement_id'] = data.pop('id_preuve_paiement')
+        if 'tresorier_id' in data and 'id_tresorier_id' not in data:
+            data['id_tresorier_id'] = data.pop('tresorier_id')
+        elif 'id_tresorier' in data and 'id_tresorier_id' not in data:
+            data['id_tresorier_id'] = data.pop('id_tresorier')
+        return super().to_internal_value(data)
+
+    def validate(self, attrs):
+        if 'id_facture' not in attrs:
+            facture_id = self.initial_data.get('id_facture') or self.initial_data.get('facture_id')
+            if facture_id:
+                try:
+                    attrs['id_facture'] = Facture.objects.get(pk=facture_id)
+                except Facture.DoesNotExist:
+                    raise serializers.ValidationError({'id_facture': 'Facture introuvable.'})
+        if 'id_banque' not in attrs:
+            banque_id = self.initial_data.get('id_banque') or self.initial_data.get('banque_id')
+            if banque_id:
+                try:
+                    attrs['id_banque'] = Banque.objects.get(pk=banque_id)
+                except Banque.DoesNotExist:
+                    raise serializers.ValidationError({'id_banque': 'Banque introuvable.'})
+        if 'id_methode_paiement' not in attrs:
+            methode_id = self.initial_data.get('id_methode_paiement') or self.initial_data.get('methode_paiement_id')
+            if methode_id:
+                try:
+                    attrs['id_methode_paiement'] = MethodePaiement.objects.get(pk=methode_id)
+                except MethodePaiement.DoesNotExist:
+                    raise serializers.ValidationError({'id_methode_paiement': 'Methode de paiement introuvable.'})
+        if self.instance is None and 'id_facture' not in attrs:
+            raise serializers.ValidationError({'id_facture': 'Ce champ est requis.'})
+        if self.instance is None and 'id_banque' not in attrs:
+            raise serializers.ValidationError({'id_banque': 'Ce champ est requis.'})
+        if self.instance is None and 'id_methode_paiement' not in attrs:
+            raise serializers.ValidationError({'id_methode_paiement': 'Ce champ est requis.'})
+        return attrs
 
 
 class TransfertSerializer(BaseDepthSerializer):
