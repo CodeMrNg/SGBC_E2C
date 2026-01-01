@@ -366,7 +366,6 @@ class FournisseurViewSet(AuditModelViewSet):
                 'agent_traitant',
                 'id_methode_paiement',
                 'id_devise',
-                'id_ligne_budgetaire',
                 'id_redacteur',
                 'id_demande_valider',
             )
@@ -810,7 +809,6 @@ class BonCommandeViewSet(AuditModelViewSet):
         'agent_traitant',
         'id_methode_paiement',
         'id_devise',
-        'id_ligne_budgetaire',
         'id_redacteur',
         'id_demande_valider',
     ).prefetch_related(
@@ -928,6 +926,32 @@ class BonCommandeViewSet(AuditModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @action(detail=True, methods=['post'], url_path='ligne-budgetaire')
+    def update_ligne_budgetaire(self, request, pk=None):
+        valeur = request.data.get('id_ligne_budgetaire') or request.data.get('ligne_budgetaire')
+        if valeur in [None, '', 'null']:
+            return Response(
+                {'message': 'Validation échouée', 'detail': 'Le champ id_ligne_budgetaire est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        bc = self.get_object()
+        bc.id_ligne_budgetaire = valeur
+        bc.save(update_fields=['id_ligne_budgetaire'])
+        log_audit(
+            request.user,
+            'bon_commande_update_ligne_budgetaire',
+            type_objet=self.audit_type,
+            id_objet=bc.id,
+            request=request,
+            details=f'Ligne budgétaire mise à jour: {valeur}',
+        )
+        serializer = self.get_serializer(bc)
+        return Response(
+            {'message': 'Ligne budgétaire mise à jour avec succès', 'data': serializer.data},
+            status=status.HTTP_200_OK,
+        )
+
     @action(detail=True, methods=['post'], url_path='transfer')
     def transfer(self, request, pk=None):
         departement_id = request.data.get('departement_id')
@@ -1006,7 +1030,6 @@ class DashboardView(APIView):
             'id_departement',
             'id_methode_paiement',
             'id_devise',
-            'id_ligne_budgetaire',
             'id_redacteur',
             'id_demande_valider',
         ).prefetch_related('lignes', 'documents')

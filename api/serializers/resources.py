@@ -195,9 +195,22 @@ class LigneBudgetaireSerializer(BaseDepthSerializer):
         write_only=True,
         required=False,
     )
+    id_bc = serializers.PrimaryKeyRelatedField(
+        queryset=BonCommande.objects.all(),
+        write_only=True,
+        required=False,
+    )
 
     class Meta(BaseDepthSerializer.Meta):
         model = LigneBudgetaire
+
+    def to_internal_value(self, data):
+        data = dict(data)
+        if 'bc_id' in data and 'id_bc' not in data:
+            data['id_bc'] = data.pop('bc_id')
+        elif 'bon_commande_id' in data and 'id_bc' not in data:
+            data['id_bc'] = data.pop('bon_commande_id')
+        return super().to_internal_value(data)
 
     def validate(self, attrs):
         if 'id_departement' not in attrs:
@@ -219,6 +232,22 @@ class LigneBudgetaireSerializer(BaseDepthSerializer):
         if self.instance is None and 'id_devise' not in attrs:
             raise serializers.ValidationError({'id_devise': 'Ce champ est requis.'})
         return attrs
+
+    def create(self, validated_data):
+        bc = validated_data.pop('id_bc', None)
+        instance = super().create(validated_data)
+        if bc:
+            bc.id_ligne_budgetaire = instance.code_ligne
+            bc.save(update_fields=['id_ligne_budgetaire'])
+        return instance
+
+    def update(self, instance, validated_data):
+        bc = validated_data.pop('id_bc', None)
+        instance = super().update(instance, validated_data)
+        if bc:
+            bc.id_ligne_budgetaire = instance.code_ligne
+            bc.save(update_fields=['id_ligne_budgetaire'])
+        return instance
 
 
 class DocumentSerializer(BaseDepthSerializer):
@@ -597,7 +626,6 @@ class BonCommandeSerializer(BaseDepthSerializer):
         write_only=True,
         required=False,
     )
-    id_ligne_budgetaire = LigneBudgetaireSerializer(read_only=True)
     transferts = TransfertLiteSerializer(many=True, read_only=True)
     agents_traitants = serializers.SerializerMethodField()
 

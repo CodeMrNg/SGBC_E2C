@@ -85,15 +85,14 @@ class BonCommande(models.Model):
     )
     montant_engage = models.DecimalField(
         max_digits=18,
-        decimal_places=2,
+        decimal_places=5,
         default=0,
     )
-    id_ligne_budgetaire = models.ForeignKey(
-        'LigneBudgetaire',
-        on_delete=models.PROTECT,
-        related_name='bons_commande',
+    id_ligne_budgetaire = models.CharField(
+        max_length=100,
         null=True,
         blank=True,
+        db_column='id_ligne_budgetaire_id',
     )
     type_achat = models.CharField(max_length=100, blank=True)
     date_bc = models.DateField(null=True, blank=True)
