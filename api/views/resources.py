@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+
 from django.db import models, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -135,6 +137,23 @@ def filter_bc_for_user(qs, user):
             return qs.filter(brouillon_filter | Q(id_departement_id=departement_id))
         return qs.filter(brouillon_filter)
     return filter_by_departement(qs, user, 'id_departement_id')
+
+
+def _quantize_money(value: Decimal) -> Decimal:
+    return value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+
+def _paiement_totaux(bc):
+    total_autorise = bc.montant_engage or Decimal('0')
+    if total_autorise <= 0:
+        total_autorise = (
+            bc.factures.aggregate(total=models.Sum('montant_ttc')).get('total') or Decimal('0')
+        )
+    total_paye = (
+        Paiement.objects.filter(id_facture__id_bc=bc).aggregate(total=models.Sum('montant')).get('total')
+        or Decimal('0')
+    )
+    return total_autorise, total_paye
 
 
 def build_history_response(viewset, type_objet: str, obj_id):
@@ -925,6 +944,182 @@ class BonCommandeViewSet(AuditModelViewSet):
             {'message': 'Agent traitant mis à jour avec succès', 'data': serializer.data},
             status=status.HTTP_200_OK,
         )
+
+    @action(detail=True, methods=['post'], url_path='ordre-virement')
+    def ordre_virement(self, request, pk=None):
+        pourcentage_raw = request.data.get('pourcentage') or request.data.get('pourcentage_paiement')
+        if pourcentage_raw in [None, '', 'null']:
+            return Response(
+                {'message': 'Validation echouee', 'detail': 'Le champ pourcentage est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            pourcentage = Decimal(str(pourcentage_raw))
+        except (InvalidOperation, TypeError):
+            return Response(
+                {'message': 'Validation echouee', 'detail': 'Le champ pourcentage est invalide.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if pourcentage <= 0:
+            return Response(
+                {'message': 'Validation echouee', 'detail': 'Le pourcentage doit etre superieur a 0.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        banque_id = request.data.get('banque_id') or request.data.get('id_banque')
+        if banque_id in [None, '', 'null']:
+            return Response(
+                {'message': 'Validation echouee', 'detail': 'Le champ banque_id est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        banque = get_object_or_404(Banque, pk=banque_id)
+
+        bc = self.get_object()
+        total_autorise, total_paye = _paiement_totaux(bc)
+        if total_autorise <= 0:
+            return Response(
+                {
+                    'message': 'Validation echouee',
+                    'detail': 'Impossible de calculer le total autorise pour ce bon de commande.',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        reste = total_autorise - total_paye
+        if reste <= 0:
+            return Response(
+                {
+                    'message': 'Validation echouee',
+                    'detail': 'Le montant total autorise est deja entierement paye.',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        montant_calcule = _quantize_money((total_autorise * pourcentage) / Decimal('100'))
+        montant_effectif = montant_calcule
+        if montant_effectif > reste:
+            montant_effectif = _quantize_money(reste)
+        if montant_effectif <= 0:
+            return Response(
+                {
+                    'message': 'Validation echouee',
+                    'detail': 'Le montant calcule est insuffisant.',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        facture_id = request.data.get('facture_id') or request.data.get('id_facture')
+        facture = None
+        if facture_id not in [None, '', 'null']:
+            facture = get_object_or_404(Facture, pk=facture_id, id_bc=bc)
+        else:
+            factures_qs = bc.factures.order_by('-date_facture', '-id')
+            if factures_qs.count() == 1:
+                facture = factures_qs.first()
+            elif factures_qs.exists():
+                return Response(
+                    {
+                        'message': 'Validation echouee',
+                        'detail': 'facture_id est requis quand plusieurs factures existent.',
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                return Response(
+                    {
+                        'message': 'Validation echouee',
+                        'detail': 'Aucune facture associee a ce bon de commande.',
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        methode_id = request.data.get('methode_paiement_id') or request.data.get('id_methode_paiement')
+        if methode_id not in [None, '', 'null']:
+            methode = get_object_or_404(MethodePaiement, pk=methode_id)
+        else:
+            methode = MethodePaiement.objects.filter(code__iexact='VIR').first()
+            if methode is None:
+                return Response(
+                    {
+                        'message': 'Validation echouee',
+                        'detail': 'Methode de paiement VIR introuvable.',
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        date_ordre = parse_date(request.data.get('date_ordre') or '')
+        date_execution = parse_date(request.data.get('date_execution') or '')
+        reference_virement = (request.data.get('reference_virement') or '').strip()
+
+        paiement = Paiement.objects.create(
+            id_facture=facture,
+            id_banque=banque,
+            id_methode_paiement=methode,
+            montant=montant_effectif,
+            date_ordre=date_ordre,
+            date_execution=date_execution,
+            reference_virement=reference_virement,
+            statut_paiement=StatutPaiement.EN_ATTENTE,
+            id_tresorier=request.user if getattr(request.user, 'id', None) else None,
+        )
+
+        log_audit(
+            request.user,
+            'bon_commande_ordre_virement',
+            type_objet=self.audit_type,
+            id_objet=bc.id,
+            request=request,
+            details=f'Ordre virement {paiement.id} | montant: {montant_effectif}',
+        )
+
+        data = {
+            'paiement_id': str(paiement.id),
+            'montant': str(montant_effectif),
+            'pourcentage': str(pourcentage),
+            'pourcentage_effectif': str(_quantize_money((montant_effectif / total_autorise) * Decimal('100'))),
+            'total_autorise': str(total_autorise),
+            'total_paye': str(total_paye),
+            'reste': str(total_autorise - total_paye - montant_effectif),
+            'banque': BanqueSerializer(banque).data,
+            'facture_id': str(facture.id) if facture else None,
+            'methode_paiement': MethodePaiementSerializer(methode).data,
+        }
+        return Response({'message': 'Ordre de virement genere', 'data': data}, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['get'], url_path='paiements')
+    def paiements(self, request, pk=None):
+        bc = self.get_object()
+        total_autorise, total_paye = _paiement_totaux(bc)
+        paiements_qs = (
+            Paiement.objects.select_related('id_banque', 'id_facture', 'id_methode_paiement')
+            .filter(id_facture__id_bc=bc)
+            .order_by('-date_ordre', '-date_execution', '-id')
+        )
+        items = []
+        for paiement in paiements_qs:
+            pourcentage = None
+            if total_autorise > 0:
+                pourcentage = _quantize_money((paiement.montant / total_autorise) * Decimal('100'))
+            items.append(
+                {
+                    'id': str(paiement.id),
+                    'montant': str(paiement.montant),
+                    'date_ordre': paiement.date_ordre,
+                    'date_execution': paiement.date_execution,
+                    'pourcentage': str(pourcentage) if pourcentage is not None else None,
+                    'banque': BanqueSerializer(paiement.id_banque).data if paiement.id_banque else None,
+                    'fournisseur': FournisseurSerializer(bc.id_fournisseur).data if bc.id_fournisseur else None,
+                    'agent_traitant': UserSerializer(bc.agent_traitant).data if bc.agent_traitant else None,
+                    'facture_id': str(paiement.id_facture_id) if paiement.id_facture_id else None,
+                    'statut_paiement': paiement.statut_paiement,
+                }
+            )
+        data = {
+            'total_autorise': str(total_autorise),
+            'total_paye': str(total_paye),
+            'reste': str(total_autorise - total_paye),
+            'paiements': items,
+        }
+        return Response({'message': 'Historique des paiements', 'data': data}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='ligne-budgetaire')
     def update_ligne_budgetaire(self, request, pk=None):
