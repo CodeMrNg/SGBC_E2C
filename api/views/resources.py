@@ -61,7 +61,7 @@ from ..serializers.resources import (
     TransfertSerializer,
 )
 
-SUPER_ADMIN_ROLES = {'SAD', 'SD', 'DAA'}
+SUPER_ADMIN_ROLES = {'SAD', 'SD', 'DAA', 'BUDGET', 'DFC', 'TRESOR'}
 
 
 def _user_role_code(user) -> str:
