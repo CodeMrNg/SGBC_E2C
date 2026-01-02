@@ -1079,6 +1079,12 @@ class BonCommandeViewSet(AuditModelViewSet):
             'total_autorise': str(total_autorise),
             'total_paye': str(total_paye),
             'reste': str(total_autorise - total_paye - montant_effectif),
+            'total_paye_pourcentage': str(
+                _quantize_money((total_paye / total_autorise) * Decimal('100'))
+            ),
+            'reste_pourcentage': str(
+                _quantize_money(((total_autorise - total_paye - montant_effectif) / total_autorise) * Decimal('100'))
+            ),
             'banque': BanqueSerializer(banque).data,
             'facture_id': str(facture.id) if facture else None,
             'methode_paiement': MethodePaiementSerializer(methode).data,
@@ -1117,6 +1123,16 @@ class BonCommandeViewSet(AuditModelViewSet):
             'total_autorise': str(total_autorise),
             'total_paye': str(total_paye),
             'reste': str(total_autorise - total_paye),
+            'total_paye_pourcentage': str(
+                _quantize_money((total_paye / total_autorise) * Decimal('100'))
+            )
+            if total_autorise > 0
+            else None,
+            'reste_pourcentage': str(
+                _quantize_money(((total_autorise - total_paye) / total_autorise) * Decimal('100'))
+            )
+            if total_autorise > 0
+            else None,
             'paiements': items,
         }
         return Response({'message': 'Historique des paiements', 'data': data}, status=status.HTTP_200_OK)
