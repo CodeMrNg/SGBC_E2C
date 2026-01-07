@@ -754,7 +754,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
 
     def get_paiements(self, obj):
         paiements = (
-            Paiement.objects.select_related('id_banque', 'id_methode_paiement')
+            Paiement.objects.select_related('id_banque', 'id_methode_paiement', 'id_facture')
             .filter(id_facture__id_bc=obj)
             .order_by('-date_ordre', '-date_execution', '-id')
         )
@@ -773,6 +773,18 @@ class BonCommandeSerializer(BaseDepthSerializer):
                     if paiement.id_methode_paiement
                     else None,
                     'facture_id': str(paiement.id_facture_id) if paiement.id_facture_id else None,
+                    'facture': (
+                        {
+                            'id': str(paiement.id_facture_id),
+                            'numero_facture': paiement.id_facture.numero_facture,
+                            'montant_ht': str(paiement.id_facture.montant_ht),
+                            'montant_ttc': str(paiement.id_facture.montant_ttc),
+                            'date_facture': paiement.id_facture.date_facture,
+                            'statut_facture': paiement.id_facture.statut_facture,
+                        }
+                        if paiement.id_facture_id
+                        else None
+                    ),
                 }
             )
         return items

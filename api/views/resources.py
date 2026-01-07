@@ -1126,25 +1126,23 @@ class BonCommandeViewSet(AuditModelViewSet):
         if facture_id not in [None, '', 'null']:
             facture = get_object_or_404(Facture, pk=facture_id, id_bc=bc)
         else:
-            factures_qs = bc.factures.order_by('-date_facture', '-id')
-            if factures_qs.count() == 1:
-                facture = factures_qs.first()
-            elif factures_qs.exists():
-                return Response(
-                    {
-                        'message': 'Validation echouee',
-                        'detail': 'facture_id est requis quand plusieurs factures existent.',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            else:
-                return Response(
-                    {
-                        'message': 'Validation echouee',
-                        'detail': 'Aucune facture associee a ce bon de commande.',
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            date_facture = parse_date(request.data.get('date_facture') or '') or timezone.now().date()
+            numero_facture = (request.data.get('numero_facture') or '').strip()
+            if not numero_facture:
+                base = (bc.numero_bc or 'BC').strip().replace(' ', '')
+                suffix = timezone.now().strftime('%Y%m%d%H%M%S')
+                numero_facture = f'FAC/AUTO/{base}/{suffix}'
+                if len(numero_facture) > 100:
+                    numero_facture = numero_facture[:100]
+            facture = Facture.objects.create(
+                id_bc=bc,
+                numero_facture=numero_facture,
+                id_devise=bc.id_devise,
+                montant_ht=montant_effectif,
+                montant_ttc=montant_effectif,
+                date_facture=date_facture,
+                statut_facture=StatutFacture.ATTENTE_PAIEMENT,
+            )
 
         methode_id = request.data.get('methode_paiement_id') or request.data.get('id_methode_paiement')
         if methode_id not in [None, '', 'null']:
@@ -1201,6 +1199,18 @@ class BonCommandeViewSet(AuditModelViewSet):
             ),
             'banque': BanqueSerializer(banque).data,
             'facture_id': str(facture.id) if facture else None,
+            'facture': (
+                {
+                    'id': str(facture.id),
+                    'numero_facture': facture.numero_facture,
+                    'montant_ht': str(facture.montant_ht),
+                    'montant_ttc': str(facture.montant_ttc),
+                    'date_facture': facture.date_facture,
+                    'statut_facture': facture.statut_facture,
+                }
+                if facture
+                else None
+            ),
             'methode_paiement': MethodePaiementSerializer(methode).data,
         }
         return Response({'message': 'Ordre de virement genere', 'data': data}, status=status.HTTP_201_CREATED)
@@ -1230,6 +1240,18 @@ class BonCommandeViewSet(AuditModelViewSet):
                     'fournisseur': FournisseurSerializer(bc.id_fournisseur).data if bc.id_fournisseur else None,
                     'agent_traitant': UserSerializer(bc.agent_traitant).data if bc.agent_traitant else None,
                     'facture_id': str(paiement.id_facture_id) if paiement.id_facture_id else None,
+                    'facture': (
+                        {
+                            'id': str(paiement.id_facture_id),
+                            'numero_facture': paiement.id_facture.numero_facture,
+                            'montant_ht': str(paiement.id_facture.montant_ht),
+                            'montant_ttc': str(paiement.id_facture.montant_ttc),
+                            'date_facture': paiement.id_facture.date_facture,
+                            'statut_facture': paiement.id_facture.statut_facture,
+                        }
+                        if paiement.id_facture_id
+                        else None
+                    ),
                     'statut_paiement': paiement.statut_paiement,
                 }
             )
