@@ -14,6 +14,12 @@ class StatutDemande(models.TextChoices):
     REJETER = ('rejeter', 'Rejeter')
 
 
+class DecisionDemande(models.TextChoices):
+    EN_ATTENTE = ('en_attente', 'En attente')
+    APPROUVE = ('approuve', 'Approuve')
+    REFUSE = ('refuse', 'Refuse')
+
+
 class Demande(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     numero_demande = models.CharField(max_length=100, unique=True)
@@ -30,6 +36,13 @@ class Demande(models.Model):
         choices=StatutDemande.choices,
         default=StatutDemande.EN_ATTENTE,
     )
+    decision = models.CharField(
+        max_length=20,
+        choices=DecisionDemande.choices,
+        default=DecisionDemande.EN_ATTENTE,
+    )
+    commentaire = models.TextField(blank=True)
+    date_signature = models.DateTimeField(null=True, blank=True)
     id_departement = models.ForeignKey(
         'Departement',
         on_delete=models.PROTECT,
@@ -46,6 +59,20 @@ class Demande(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name='demandes_traitees',
+        null=True,
+        blank=True,
+    )
+    id_signataire = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='demandes_signees',
+        null=True,
+        blank=True,
+    )
+    id_document_preuve = models.ForeignKey(
+        'Document',
+        on_delete=models.SET_NULL,
+        related_name='demandes_signature',
         null=True,
         blank=True,
     )

@@ -3,6 +3,7 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from django.db import models, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.decorators import action
@@ -36,7 +37,7 @@ from ..models import (
     Utilisateur,
 )
 from ..models.bon_commande import DecisionSignature, StatutBC
-from ..models.demandes import StatutDemande
+from ..models.demandes import DecisionDemande, StatutDemande
 from ..models.documents import StatutArchivage
 from ..models.facturation_paiement import StatutFacture, StatutPaiement
 from ..models.transferts import StatutTransfert
@@ -579,6 +580,79 @@ class DemandeViewSet(AuditModelViewSet):
         serializer = self.get_serializer(demande)
         return Response(
             {'message': 'Agent traitant mis à jour avec succès', 'data': serializer.data},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=['post'], url_path='signature')
+    def signature(self, request, pk=None):
+        demande = self.get_object()
+        decision = (request.data.get('decision') or '').strip().lower()
+        if not decision:
+            return Response(
+                {'message': 'Validation echouee', 'detail': 'Le champ decision est requis.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if decision not in DecisionDemande.values:
+            return Response(
+                {'message': 'Validation echouee', 'detail': 'Decision invalide.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        signataire_id = (
+            request.data.get('signataire_id')
+            or request.data.get('user_id')
+            or request.data.get('id_signataire')
+        )
+        if signataire_id in [None, '', 'null']:
+            signataire = request.user if getattr(request.user, 'id', None) else None
+            if not signataire:
+                return Response(
+                    {'message': 'Validation echouee', 'detail': 'Signataire requis.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        else:
+            signataire = get_object_or_404(Utilisateur, pk=signataire_id)
+
+        document_preuve_id = request.data.get('document_preuve_id') or request.data.get('id_document_preuve')
+        if document_preuve_id in [None, '', 'null']:
+            document_preuve = None
+        else:
+            document_preuve = get_object_or_404(Document, pk=document_preuve_id)
+
+        commentaire = (request.data.get('commentaire') or request.data.get('comment') or '').strip()
+
+        demande.id_signataire = signataire
+        demande.decision = decision
+        demande.commentaire = commentaire
+        demande.id_document_preuve = document_preuve
+        demande.date_signature = timezone.now()
+
+        update_fields = [
+            'id_signataire',
+            'decision',
+            'commentaire',
+            'id_document_preuve',
+            'date_signature',
+        ]
+        if decision == DecisionDemande.APPROUVE:
+            demande.statut_demande = StatutDemande.VALIDER
+            update_fields.append('statut_demande')
+        elif decision == DecisionDemande.REFUSE:
+            demande.statut_demande = StatutDemande.REJETER
+            update_fields.append('statut_demande')
+
+        demande.save(update_fields=update_fields)
+        log_audit(
+            request.user,
+            'demande_signature',
+            type_objet=self.audit_type,
+            id_objet=demande.id,
+            request=request,
+            details=f'Decision: {decision}',
+        )
+        serializer = self.get_serializer(demande)
+        return Response(
+            {'message': 'Signature de demande enregistree', 'data': serializer.data},
             status=status.HTTP_200_OK,
         )
 

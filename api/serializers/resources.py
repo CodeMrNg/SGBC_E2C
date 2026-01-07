@@ -432,12 +432,43 @@ class DemandeSerializer(BaseDepthSerializer):
     )
     canal = serializers.CharField(required=False, allow_blank=True)
     agent_traitant = UserSerializer(read_only=True)
+    id_signataire = UserSerializer(read_only=True)
+    id_signataire_id = serializers.PrimaryKeyRelatedField(
+        queryset=Utilisateur.objects.all(),
+        source='id_signataire',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    id_document_preuve = DocumentSerializer(read_only=True)
+    id_document_preuve_id = serializers.PrimaryKeyRelatedField(
+        queryset=Document.objects.all(),
+        source='id_document_preuve',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+    signature_utilisateur = serializers.SerializerMethodField()
     transferts = TransfertLiteSerializer(many=True, read_only=True)
     agents_traitants = serializers.SerializerMethodField()
 
     class Meta(BaseDepthSerializer.Meta):
         model = Demande
         read_only_fields = ('numero_demande',)
+
+    def to_internal_value(self, data):
+        data = dict(data)
+        if 'id_signataire' in data and 'id_signataire_id' not in data:
+            data['id_signataire_id'] = data.pop('id_signataire')
+        elif 'signataire_id' in data and 'id_signataire_id' not in data:
+            data['id_signataire_id'] = data.pop('signataire_id')
+        elif 'user_id' in data and 'id_signataire_id' not in data:
+            data['id_signataire_id'] = data.pop('user_id')
+        if 'id_document_preuve' in data and 'id_document_preuve_id' not in data:
+            data['id_document_preuve_id'] = data.pop('id_document_preuve')
+        elif 'document_preuve_id' in data and 'id_document_preuve_id' not in data:
+            data['id_document_preuve_id'] = data.pop('document_preuve_id')
+        return super().to_internal_value(data)
 
     def validate(self, attrs):
         """
@@ -461,6 +492,9 @@ class DemandeSerializer(BaseDepthSerializer):
         if self.instance is None and 'id_departement' not in attrs:
             raise serializers.ValidationError({'id_departement': 'Ce champ est requis.'})
         return attrs
+
+    def get_signature_utilisateur(self, obj):
+        return _build_signature_utilisateur_payload(getattr(obj, 'id_signataire', None))
 
     def get_agents_traitants(self, obj):
         """
