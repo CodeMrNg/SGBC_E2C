@@ -622,6 +622,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
     lignes = LigneBCSerializer(many=True, read_only=True)
     documents = DocumentSerializer(many=True, read_only=True)
     signatures = SignatureBCDetailSerializer(many=True, read_only=True)
+    paiements = serializers.SerializerMethodField()
     id_demande = DemandeReferenceSerializer(read_only=True)
     id_demande_id = serializers.PrimaryKeyRelatedField(
         queryset=Demande.objects.all(),
@@ -672,6 +673,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
         view = self.context.get('view')
         if not view or getattr(view, 'action', None) not in {'retrieve', 'list'}:
             data.pop('signatures', None)
+            data.pop('paiements', None)
         return data
 
     def to_internal_value(self, data):
@@ -749,6 +751,31 @@ class BonCommandeSerializer(BaseDepthSerializer):
                 seen.add(uid)
                 unique_users.append(user)
         return UserSerializer(unique_users, many=True).data
+
+    def get_paiements(self, obj):
+        paiements = (
+            Paiement.objects.select_related('id_banque', 'id_methode_paiement')
+            .filter(id_facture__id_bc=obj)
+            .order_by('-date_ordre', '-date_execution', '-id')
+        )
+        items = []
+        for paiement in paiements:
+            items.append(
+                {
+                    'id': str(paiement.id),
+                    'montant': str(paiement.montant),
+                    'date_ordre': paiement.date_ordre,
+                    'date_execution': paiement.date_execution,
+                    'reference_virement': paiement.reference_virement,
+                    'statut_paiement': paiement.statut_paiement,
+                    'banque': BanqueSerializer(paiement.id_banque).data if paiement.id_banque else None,
+                    'methode_paiement': MethodePaiementSerializer(paiement.id_methode_paiement).data
+                    if paiement.id_methode_paiement
+                    else None,
+                    'facture_id': str(paiement.id_facture_id) if paiement.id_facture_id else None,
+                }
+            )
+        return items
 
 
 class SignatureBCSerializer(BaseDepthSerializer):

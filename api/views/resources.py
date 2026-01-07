@@ -144,6 +144,38 @@ def _quantize_money(value: Decimal) -> Decimal:
     return value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
+def _safe_decimal(value) -> Decimal:
+    if value in [None, '', 'null']:
+        return Decimal('0')
+    if isinstance(value, Decimal):
+        return value
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return Decimal('0')
+
+
+def _compute_montant_engage(bc) -> Decimal:
+    if not bc:
+        return Decimal('0')
+    total = Decimal('0')
+    bc_tva = _safe_decimal(getattr(bc, 'tva', None))
+    for ligne in bc.lignes.all():
+        base = _safe_decimal(ligne.quantite) * _safe_decimal(ligne.prix_unitaire)
+        taux_tva = _safe_decimal(ligne.taux_tva) if ligne.taux_tva is not None else bc_tva
+        tva_amount = base * (taux_tva / Decimal('100')) if taux_tva else Decimal('0')
+        ca_amount = _safe_decimal(ligne.ca)
+        total += base + tva_amount + ca_amount
+    return _quantize_money(total)
+
+
+def _update_bc_montant_engage(bc) -> None:
+    if not bc:
+        return
+    bc.montant_engage = _compute_montant_engage(bc)
+    bc.save(update_fields=['montant_engage'])
+
+
 def _paiement_totaux(bc):
     total_autorise = bc.montant_engage or Decimal('0')
     if total_autorise <= 0:
@@ -925,6 +957,14 @@ class BonCommandeViewSet(AuditModelViewSet):
     audit_prefix = 'bon_commande'
     audit_type = 'BON_COMMANDE'
 
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        _update_bc_montant_engage(serializer.instance)
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        _update_bc_montant_engage(serializer.instance)
+
     def get_queryset(self):
         qs = super().get_queryset()
         numero = self.request.GET.get('numero')
@@ -1405,6 +1445,25 @@ class LigneBCViewSet(AuditModelViewSet):
     serializer_class = LigneBCSerializer
     audit_prefix = 'ligne_bc'
     audit_type = 'LIGNE_BC'
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        instance = serializer.instance
+        _update_bc_montant_engage(getattr(instance, 'id_bc', None))
+
+    def perform_update(self, serializer):
+        old_bc = getattr(self.get_object(), 'id_bc', None)
+        super().perform_update(serializer)
+        new_bc = getattr(serializer.instance, 'id_bc', None)
+        if old_bc and (not new_bc or old_bc.id != new_bc.id):
+            _update_bc_montant_engage(old_bc)
+        if new_bc:
+            _update_bc_montant_engage(new_bc)
+
+    def perform_destroy(self, instance):
+        bc = getattr(instance, 'id_bc', None)
+        super().perform_destroy(instance)
+        _update_bc_montant_engage(bc)
 
     def get_queryset(self):
         qs = super().get_queryset()
