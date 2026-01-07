@@ -1197,6 +1197,9 @@ class BonCommandeViewSet(AuditModelViewSet):
             'reste_pourcentage': str(
                 _quantize_money(((total_autorise - total_paye - montant_effectif) / total_autorise) * Decimal('100'))
             ),
+            'date_ordre': paiement.date_ordre,
+            'date_execution': paiement.date_execution,
+            'date_paiement': paiement.date_execution or paiement.date_ordre,
             'banque': BanqueSerializer(banque).data,
             'facture_id': str(facture.id) if facture else None,
             'facture': (
@@ -1235,6 +1238,7 @@ class BonCommandeViewSet(AuditModelViewSet):
                     'montant': str(paiement.montant),
                     'date_ordre': paiement.date_ordre,
                     'date_execution': paiement.date_execution,
+                    'date_paiement': paiement.date_execution or paiement.date_ordre,
                     'pourcentage': str(pourcentage) if pourcentage is not None else None,
                     'banque': BanqueSerializer(paiement.id_banque).data if paiement.id_banque else None,
                     'fournisseur': FournisseurSerializer(bc.id_fournisseur).data if bc.id_fournisseur else None,

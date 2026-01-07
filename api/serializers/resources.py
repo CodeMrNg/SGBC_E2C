@@ -794,6 +794,7 @@ class BonCommandeSerializer(BaseDepthSerializer):
                     'montant': str(paiement.montant),
                     'date_ordre': paiement.date_ordre,
                     'date_execution': paiement.date_execution,
+                    'date_paiement': paiement.date_execution or paiement.date_ordre,
                     'reference_virement': paiement.reference_virement,
                     'statut_paiement': paiement.statut_paiement,
                     'pourcentage': str(pourcentage) if pourcentage is not None else None,
