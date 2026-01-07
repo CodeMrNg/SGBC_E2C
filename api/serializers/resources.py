@@ -1,3 +1,6 @@
+from decimal import Decimal, ROUND_HALF_UP
+
+from django.db import models
 from rest_framework import serializers
 
 from ..models import (
@@ -32,6 +35,10 @@ class BaseDepthSerializer(serializers.ModelSerializer):
     class Meta:
         depth = 1
         fields = '__all__'
+
+
+def _quantize_money(value: Decimal) -> Decimal:
+    return value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
 def _build_signature_utilisateur_payload(user):
@@ -753,6 +760,22 @@ class BonCommandeSerializer(BaseDepthSerializer):
         return UserSerializer(unique_users, many=True).data
 
     def get_paiements(self, obj):
+        total_autorise = obj.montant_engage or Decimal('0')
+        if total_autorise <= 0:
+            total_autorise = (
+                obj.factures.aggregate(total=models.Sum('montant_ttc')).get('total') or Decimal('0')
+            )
+        total_paye = (
+            Paiement.objects.filter(id_facture__id_bc=obj).aggregate(total=models.Sum('montant')).get('total')
+            or Decimal('0')
+        )
+        reste = total_autorise - total_paye
+        total_paye_pourcentage = (
+            _quantize_money((total_paye / total_autorise) * Decimal('100')) if total_autorise > 0 else None
+        )
+        reste_pourcentage = (
+            _quantize_money((reste / total_autorise) * Decimal('100')) if total_autorise > 0 else None
+        )
         paiements = (
             Paiement.objects.select_related('id_banque', 'id_methode_paiement', 'id_facture')
             .filter(id_facture__id_bc=obj)
@@ -760,6 +783,11 @@ class BonCommandeSerializer(BaseDepthSerializer):
         )
         items = []
         for paiement in paiements:
+            pourcentage = (
+                _quantize_money((paiement.montant / total_autorise) * Decimal('100'))
+                if total_autorise > 0
+                else None
+            )
             items.append(
                 {
                     'id': str(paiement.id),
@@ -768,6 +796,15 @@ class BonCommandeSerializer(BaseDepthSerializer):
                     'date_execution': paiement.date_execution,
                     'reference_virement': paiement.reference_virement,
                     'statut_paiement': paiement.statut_paiement,
+                    'pourcentage': str(pourcentage) if pourcentage is not None else None,
+                    'pourcentage_effectif': str(pourcentage) if pourcentage is not None else None,
+                    'total_autorise': str(total_autorise),
+                    'total_paye': str(total_paye),
+                    'reste': str(reste),
+                    'total_paye_pourcentage': str(total_paye_pourcentage)
+                    if total_paye_pourcentage is not None
+                    else None,
+                    'reste_pourcentage': str(reste_pourcentage) if reste_pourcentage is not None else None,
                     'banque': BanqueSerializer(paiement.id_banque).data if paiement.id_banque else None,
                     'methode_paiement': MethodePaiementSerializer(paiement.id_methode_paiement).data
                     if paiement.id_methode_paiement
