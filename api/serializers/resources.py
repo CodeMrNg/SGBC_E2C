@@ -788,13 +788,16 @@ class BonCommandeSerializer(BaseDepthSerializer):
                 if total_autorise > 0
                 else None
             )
+            date_ordre = paiement.date_ordre
+            if not date_ordre and paiement.id_facture_id:
+                date_ordre = paiement.id_facture.date_facture
             items.append(
                 {
                     'id': str(paiement.id),
                     'montant': str(paiement.montant),
-                    'date_ordre': paiement.date_ordre,
+                    'date_ordre': date_ordre,
                     'date_execution': paiement.date_execution,
-                    'date_paiement': paiement.date_execution or paiement.date_ordre,
+                    'date_paiement': paiement.date_execution or date_ordre,
                     'reference_virement': paiement.reference_virement,
                     'statut_paiement': paiement.statut_paiement,
                     'pourcentage': str(pourcentage) if pourcentage is not None else None,

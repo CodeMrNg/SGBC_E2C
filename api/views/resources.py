@@ -1162,6 +1162,9 @@ class BonCommandeViewSet(AuditModelViewSet):
         date_execution = parse_date(request.data.get('date_execution') or '')
         reference_virement = (request.data.get('reference_virement') or '').strip()
 
+        if not date_ordre and facture:
+            date_ordre = facture.date_facture
+
         paiement = Paiement.objects.create(
             id_facture=facture,
             id_banque=banque,
@@ -1232,13 +1235,16 @@ class BonCommandeViewSet(AuditModelViewSet):
             pourcentage = None
             if total_autorise > 0:
                 pourcentage = _quantize_money((paiement.montant / total_autorise) * Decimal('100'))
+            date_ordre = paiement.date_ordre
+            if not date_ordre and paiement.id_facture_id:
+                date_ordre = paiement.id_facture.date_facture
             items.append(
                 {
                     'id': str(paiement.id),
                     'montant': str(paiement.montant),
-                    'date_ordre': paiement.date_ordre,
+                    'date_ordre': date_ordre,
                     'date_execution': paiement.date_execution,
-                    'date_paiement': paiement.date_execution or paiement.date_ordre,
+                    'date_paiement': paiement.date_execution or date_ordre,
                     'pourcentage': str(pourcentage) if pourcentage is not None else None,
                     'banque': BanqueSerializer(paiement.id_banque).data if paiement.id_banque else None,
                     'fournisseur': FournisseurSerializer(bc.id_fournisseur).data if bc.id_fournisseur else None,
