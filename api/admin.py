@@ -314,7 +314,7 @@ class DemandeAdmin(admin.ModelAdmin):
         'numero_demande',
         'objet',
         'source',
-        'rapport_daa',
+        #'rapport_daa',
         'id_fournisseur',
         'id_departement',
         'statut_demande',
