@@ -48,6 +48,7 @@ from ..serializers.resources import (
     BanqueSerializer,
     BonCommandeSerializer,
     CategorieSerializer,
+    DemandeReferenceSerializer,
     DemandeSerializer,
     DeviseSerializer,
     DocumentSerializer,
@@ -187,6 +188,79 @@ def _paiement_totaux(bc):
         or Decimal('0')
     )
     return total_autorise, total_paye
+
+
+def _build_ordre_virement_payload(
+    paiement,
+    *,
+    total_autorise=None,
+    total_paye=None,
+    pourcentage=None,
+):
+    facture = getattr(paiement, 'id_facture', None)
+    bc = getattr(facture, 'id_bc', None) if facture else None
+
+    if total_autorise is None or total_paye is None:
+        if bc:
+            total_autorise, total_paye = _paiement_totaux(bc)
+        else:
+            total_autorise, total_paye = Decimal('0'), Decimal('0')
+
+    total_autorise = _safe_decimal(total_autorise)
+    total_paye = _safe_decimal(total_paye)
+    montant = _safe_decimal(getattr(paiement, 'montant', None))
+
+    pourcentage_effectif = (
+        _quantize_money((montant / total_autorise) * Decimal('100')) if total_autorise > 0 else None
+    )
+    pourcentage_value = pourcentage if pourcentage is not None else pourcentage_effectif
+
+    reste = total_autorise - total_paye - montant
+    total_paye_pourcentage = (
+        _quantize_money((total_paye / total_autorise) * Decimal('100')) if total_autorise > 0 else None
+    )
+    reste_pourcentage = (
+        _quantize_money((reste / total_autorise) * Decimal('100')) if total_autorise > 0 else None
+    )
+
+    banque = getattr(paiement, 'id_banque', None)
+    methode = getattr(paiement, 'id_methode_paiement', None)
+    demande = getattr(bc, 'id_demande', None) if bc else None
+
+    data = {
+        'paiement_id': str(paiement.id),
+        'montant': str(montant),
+        'pourcentage': str(pourcentage_value) if pourcentage_value is not None else None,
+        'pourcentage_effectif': str(pourcentage_effectif) if pourcentage_effectif is not None else None,
+        'total_autorise': str(total_autorise),
+        'total_paye': str(total_paye),
+        'reste': str(reste),
+        'total_paye_pourcentage': str(total_paye_pourcentage)
+        if total_paye_pourcentage is not None
+        else None,
+        'reste_pourcentage': str(reste_pourcentage) if reste_pourcentage is not None else None,
+        'date_ordre': paiement.date_ordre,
+        'date_execution': paiement.date_execution,
+        'date_paiement': paiement.date_execution or paiement.date_ordre,
+        'banque': BanqueSerializer(banque).data if banque else None,
+        'facture_id': str(facture.id) if facture else None,
+        'facture': (
+            {
+                'id': str(facture.id),
+                'numero_facture': facture.numero_facture,
+                'montant_ht': str(facture.montant_ht),
+                'montant_ttc': str(facture.montant_ttc),
+                'date_facture': facture.date_facture,
+                'statut_facture': facture.statut_facture,
+            }
+            if facture
+            else None
+        ),
+        'methode_paiement': MethodePaiementSerializer(methode).data if methode else None,
+        'bon_commande': BonCommandeSerializer(bc).data if bc else None,
+        'demande': DemandeReferenceSerializer(demande).data if demande else None,
+    }
+    return data
 
 
 def build_history_response(viewset, type_objet: str, obj_id):
@@ -1186,39 +1260,12 @@ class BonCommandeViewSet(AuditModelViewSet):
             details=f'Ordre virement {paiement.id} | montant: {montant_effectif}',
         )
 
-        data = {
-            'paiement_id': str(paiement.id),
-            'montant': str(montant_effectif),
-            'pourcentage': str(pourcentage),
-            'pourcentage_effectif': str(_quantize_money((montant_effectif / total_autorise) * Decimal('100'))),
-            'total_autorise': str(total_autorise),
-            'total_paye': str(total_paye),
-            'reste': str(total_autorise - total_paye - montant_effectif),
-            'total_paye_pourcentage': str(
-                _quantize_money((total_paye / total_autorise) * Decimal('100'))
-            ),
-            'reste_pourcentage': str(
-                _quantize_money(((total_autorise - total_paye - montant_effectif) / total_autorise) * Decimal('100'))
-            ),
-            'date_ordre': paiement.date_ordre,
-            'date_execution': paiement.date_execution,
-            'date_paiement': paiement.date_execution or paiement.date_ordre,
-            'banque': BanqueSerializer(banque).data,
-            'facture_id': str(facture.id) if facture else None,
-            'facture': (
-                {
-                    'id': str(facture.id),
-                    'numero_facture': facture.numero_facture,
-                    'montant_ht': str(facture.montant_ht),
-                    'montant_ttc': str(facture.montant_ttc),
-                    'date_facture': facture.date_facture,
-                    'statut_facture': facture.statut_facture,
-                }
-                if facture
-                else None
-            ),
-            'methode_paiement': MethodePaiementSerializer(methode).data,
-        }
+        data = _build_ordre_virement_payload(
+            paiement,
+            total_autorise=total_autorise,
+            total_paye=total_paye,
+            pourcentage=pourcentage,
+        )
         return Response({'message': 'Ordre de virement genere', 'data': data}, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['get'], url_path='paiements')
@@ -1596,7 +1643,13 @@ class FactureViewSet(AuditModelViewSet):
 
 class PaiementViewSet(AuditModelViewSet):
     queryset = Paiement.objects.select_related(
-        'id_facture', 'id_banque', 'id_methode_paiement', 'id_preuve_paiement', 'id_tresorier'
+        'id_facture',
+        'id_facture__id_bc',
+        'id_facture__id_bc__id_demande',
+        'id_banque',
+        'id_methode_paiement',
+        'id_preuve_paiement',
+        'id_tresorier',
     ).all()
     serializer_class = PaiementSerializer
     audit_prefix = 'paiement'
@@ -1614,6 +1667,27 @@ class PaiementViewSet(AuditModelViewSet):
         if statut:
             qs = qs.filter(statut_paiement=statut)
         return filter_by_departement(qs, self.request.user, 'id_facture__id_bc__id_departement_id')
+
+    @action(detail=True, methods=['get'], url_path='ordre-virement')
+    def ordre_virement(self, request, pk=None):
+        paiement = self.get_object()
+        facture = getattr(paiement, 'id_facture', None)
+        bc = getattr(facture, 'id_bc', None) if facture else None
+        total_autorise = Decimal('0')
+        total_paye = Decimal('0')
+        if bc:
+            total_autorise, total_paye = _paiement_totaux(bc)
+        montant = _safe_decimal(getattr(paiement, 'montant', None))
+        total_paye_sans_ordre = total_paye - montant
+        if total_paye_sans_ordre < 0:
+            total_paye_sans_ordre = Decimal('0')
+
+        data = _build_ordre_virement_payload(
+            paiement,
+            total_autorise=total_autorise,
+            total_paye=total_paye_sans_ordre,
+        )
+        return Response({'message': 'Ordre de virement', 'data': data}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
