@@ -222,6 +222,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Avoid TooManyFieldsSent when large form/query payloads are submitted.
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 

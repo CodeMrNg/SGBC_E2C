@@ -463,6 +463,37 @@ class DemandeSerializer(BaseDepthSerializer):
         model = Demande
         read_only_fields = ('numero_demande',)
 
+    def create(self, validated_data):
+        departement = validated_data.get('id_departement')
+        if departement:
+            # "source" must keep the department that initiated the demande.
+            validated_data['source'] = departement.nom
+        return super().create(validated_data)
+
+    def _get_departement_initiateur(self, obj):
+        prefetched = getattr(obj, '_prefetched_objects_cache', {})
+        transferts = prefetched.get('transferts')
+        premier_transfert = None
+
+        if transferts is not None:
+            if transferts:
+                premier_transfert = min(transferts, key=lambda transfert: transfert.date_transfert)
+        else:
+            premier_transfert = (
+                obj.transferts.select_related('departement_source').order_by('date_transfert').first()
+            )
+
+        if premier_transfert and getattr(premier_transfert, 'departement_source', None):
+            return premier_transfert.departement_source
+        return getattr(obj, 'id_departement', None)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        departement_initiateur = self._get_departement_initiateur(instance)
+        if departement_initiateur and getattr(departement_initiateur, 'nom', None):
+            data['source'] = departement_initiateur.nom
+        return data
+
     def to_internal_value(self, data):
         data = dict(data)
         if 'id_signataire' in data and 'id_signataire_id' not in data:
